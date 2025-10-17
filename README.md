@@ -8,11 +8,11 @@ Team 4 members:
 3. Irfan Rahmanindra - G2504917A
 4. Roshani Ayu Pranasti - G2504973A
 
-## System Definition
+## Application Definition
 
 TODO
 
-## System Objectives
+## Application Objectives
 
 TODO
 
