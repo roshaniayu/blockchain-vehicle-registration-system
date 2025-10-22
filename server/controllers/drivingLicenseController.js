@@ -4,6 +4,7 @@ const {
   errorResponse,
 } = require("../contracts/responseFormat");
 const { randomUUID } = require("crypto"); // ⭐ CORRECTED: Using built-in crypto module for UUIDs
+const logger = require('../utility/logger');
 
 /**
  * Retrieves all driving licenses.
@@ -12,6 +13,7 @@ const { randomUUID } = require("crypto"); // ⭐ CORRECTED: Using built-in crypt
 exports.getAllLicenses = async (req, res) => {
   try {
     const licenses = await licenseService.getAllLicenses(req.db);
+    logger.database('SELECT', 'DrivingLicenses', `SUCCESS - Retrieved ${licenses.length} licenses`);
     return successResponse(
       res,
       "Licenses retrieved successfully.",
@@ -19,7 +21,7 @@ exports.getAllLicenses = async (req, res) => {
       licenses
     );
   } catch (error) {
-    console.error("Error in getAllLicenses:", error);
+    logger.error('Failed to retrieve licenses', error.message);
     return errorResponse(
       res,
       "Failed to retrieve licenses.",
@@ -38,6 +40,7 @@ exports.getLicenseById = async (req, res) => {
 
   // Basic validation check for UUID format consistency
   if (!licenseId || licenseId.length < 36) {
+    logger.warn(`Invalid License ID format: ${licenseId}`);
     return errorResponse(res, "Invalid License ID format provided.", 400);
   }
 
@@ -45,9 +48,11 @@ exports.getLicenseById = async (req, res) => {
     const license = await licenseService.getLicenseById(req.db, licenseId);
 
     if (!license) {
+      logger.warn(`License not found with ID: ${licenseId}`);
       return errorResponse(res, `License with ID ${licenseId} not found.`, 404);
     }
 
+    logger.database('SELECT', `DrivingLicenses (ID: ${licenseId})`, 'SUCCESS');
     return successResponse(
       res,
       "License retrieved successfully.",
@@ -55,7 +60,7 @@ exports.getLicenseById = async (req, res) => {
       license
     );
   } catch (error) {
-    console.error("Error in getLicenseById:", error);
+    logger.error('Failed to retrieve license', error.message);
     return errorResponse(
       res,
       "Failed to retrieve license.",
@@ -74,6 +79,7 @@ exports.createLicense = async (req, res) => {
   const { LicenseClass, IssueDate, ExpiryDate } = req.body;
 
   if (!LicenseClass || !IssueDate || !ExpiryDate) {
+    logger.warn('Create license failed - missing required fields');
     return errorResponse(
       res,
       "Missing required fields: LicenseClass, IssueDate, ExpiryDate.",
@@ -97,6 +103,7 @@ exports.createLicense = async (req, res) => {
       req.db,
       licenseData
     );
+    logger.database('INSERT', 'DrivingLicenses', `SUCCESS - Created license ${newLicenseId}`, { LicenseClass, IssueDate, ExpiryDate });
     return successResponse(
       res,
       "License created successfully.",
@@ -104,7 +111,7 @@ exports.createLicense = async (req, res) => {
       createdLicense
     );
   } catch (error) {
-    console.error("Error in createLicense:", error);
+    logger.error('Failed to create license', error.message);
     // Handle potential unique constraint errors (less likely for LicenseID, but good practice)
     return errorResponse(
       res,
@@ -125,10 +132,12 @@ exports.updateLicense = async (req, res) => {
   const updates = req.body;
 
   if (!licenseId || licenseId.length < 36) {
+    logger.warn(`Invalid License ID format: ${licenseId}`);
     return errorResponse(res, "Invalid License ID format provided.", 400);
   }
 
   if (Object.keys(updates).length === 0) {
+    logger.warn('Update license failed - no fields provided');
     return errorResponse(res, "No fields provided for update.", 400);
   }
 
@@ -143,10 +152,11 @@ exports.updateLicense = async (req, res) => {
       ExpiryDate,
     });
 
+    logger.database('UPDATE', `DrivingLicenses (ID: ${licenseId})`, 'SUCCESS', updates);
     // Service throws error if changes === 0, so we only need to handle success here
     return successResponse(res, "License updated successfully.", 200, result);
   } catch (error) {
-    console.error("Error in updateLicense:", error);
+    logger.error('Failed to update license', error.message);
     // The service layer returns specific errors for 'not found' cases
     const status = error.message.includes("not found") ? 404 : 400;
     return errorResponse(
@@ -166,12 +176,14 @@ exports.deleteLicense = async (req, res) => {
   const { licenseId } = req.params;
 
   if (!licenseId || licenseId.length < 36) {
+    logger.warn(`Invalid License ID format: ${licenseId}`);
     return errorResponse(res, "Invalid License ID format provided.", 400);
   }
 
   try {
     const result = await licenseService.deleteLicense(req.db, licenseId);
 
+    logger.database('DELETE', `DrivingLicenses (ID: ${licenseId})`, 'SUCCESS');
     // Service throws error if changes === 0, so we only need to handle success here
     return successResponse(
       res,
@@ -180,7 +192,7 @@ exports.deleteLicense = async (req, res) => {
       result
     );
   } catch (error) {
-    console.error("Error in deleteLicense:", error);
+    logger.error('Failed to delete license', error.message);
     const status = error.message.includes("not found") ? 404 : 500;
     return errorResponse(
       res,

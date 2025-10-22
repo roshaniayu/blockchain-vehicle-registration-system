@@ -1,3 +1,39 @@
-[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
-🚀 Server running on http://localhost:3000
-✅ Connected to the SQLite database at: /Users/irfanrahmanindra/Documents/NTU/Blockchain/SmartContract Repo/blockchain-vehicle-registration-system/server/database/mydb.db
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+🚀 [2025-10-22 22:59:16.402] [SERVER] Server running on http://localhost:3000
+ℹ️ [2025-10-22 22:59:16.405] [INFO] API Docs available at: http://localhost:3000/api-docs
+ℹ️ [2025-10-22 22:59:16.405] [INFO] Environment: development
+✅ [2025-10-22 22:59:16.406] [SUCCESS] Connected to SQLite database at: /Users/irfanrahmanindra/Documents/NTU/Blockchain/SmartContract Repo/blockchain-vehicle-registration-system/server/database/mydb.db
+📤 [2025-10-22 22:59:32.387] [REQUEST] HTTP GET /api/init [User: Anonymous]
+{
+  "ip": "::1",
+  "query": null
+}
+ℹ️ [2025-10-22 22:59:32.388] [INFO] Database initialization requested
+🚀 Running database schema check and setup...
+✨ Table "DrivingLicenses" is ready.
+✨ Table "VehicleOwner" is ready.
+✨ Table "Users" is ready.
+📊 Inserting sample data...
+✅ All sample data inserted successfully.
+✅ [2025-10-22 22:59:32.552] [SUCCESS] Database initialization complete and tables created/checked
+📥 [2025-10-22 22:59:32.552] [RESPONSE] HTTP 200 - /init (165ms) 
+📤 [2025-10-22 22:59:53.092] [REQUEST] HTTP POST /api/auth/login [User: Anonymous]
+{
+  "ip": "::1",
+  "query": null
+}
+🔐 [2025-10-22 22:59:53.152] [AUTH] AUTH [LOGIN] admin SUCCESS
+{
+  "userId": "a1db4e58-f415-4356-b3f5-e742f8e7dc19",
+  "userType": "Admin"
+}
+📥 [2025-10-22 22:59:53.153] [RESPONSE] HTTP 200 - /login (61ms) 
+📤 [2025-10-22 23:00:01.571] [REQUEST] HTTP GET /api/users [User: Anonymous]
+{
+  "ip": "::1",
+  "query": null
+}
+💾 [2025-10-22 23:00:01.576] [DATABASE] DATABASE [SELECT] Users SUCCESS - Retrieved 6 users
+📥 [2025-10-22 23:00:01.577] [RESPONSE] HTTP 200 - / (7ms) 
+ATABASE] DATABASE [SELECT] Users SUCCESS - Retrieved 6 users
+[2025-10-22 23:00:01.577] [RESPONSE] HTTP 200 - / (7ms) 

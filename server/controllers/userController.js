@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 const { successResponse, errorResponse } = require('../contracts/responseFormat');
+const logger = require('../utility/logger');
 
 // This file exports functions that take (req, res) and handle the request lifecycle.
 
@@ -14,8 +15,10 @@ module.exports = {
         try {
             const users = await userService.getAllUsers(req.db); // req.db passed from router/middleware
             
+            logger.database('SELECT', 'Users', `SUCCESS - Retrieved ${users.length} users`);
             return successResponse(res, 'Users retrieved successfully.', 200, users);
         } catch (err) {
+            logger.error('Failed to retrieve users', err.message);
             return errorResponse(res, 'Failed to retrieve users.', 500, err.message);
         }
     },
@@ -30,11 +33,14 @@ module.exports = {
             const user = await userService.getUserById(req.db, id);
             
             if (!user) {
+                logger.warn(`User not found with ID: ${id}`);
                 return errorResponse(res, `User with ID ${id} not found.`, 404, null);
             }
             
+            logger.database('SELECT', `Users (ID: ${id})`, 'SUCCESS');
             return successResponse(res, 'User retrieved successfully.', 200, user);
         } catch (err) {
+            logger.error('Failed to retrieve user', err.message);
             return errorResponse(res, 'Failed to retrieve user.', 500, err.message);
         }
     },
@@ -48,16 +54,19 @@ module.exports = {
 
         // Controller performs validation checks
         if (!name || !email) {
+            logger.warn('Create user failed - missing required fields');
             return errorResponse(res, 'Missing required fields: name and email.', 400, null);
         }
 
         try {
             const newUser = await userService.createUser(req.db, name, email);
             
+            logger.database('INSERT', 'Users', `SUCCESS - Created user ${newUser.ID}`, { name, email });
             return successResponse(res, 'User created successfully.', 201, newUser);
         } catch (err) {
             // Check if error is due to database constraints (e.g., unique email)
             const statusCode = err.message.includes('SQLITE_CONSTRAINT') ? 400 : 500;
+            logger.error('Failed to create user', err.message);
             return errorResponse(res, 'Failed to create user.', statusCode, err.message);
         }
     }
