@@ -8,6 +8,9 @@ Team 4 members:
 3. Irfan Rahmanindra - G2504917A
 4. Roshani Ayu Pranasti - G2504973A
 
+## Tech Stack
+### Backend -> Express.js 
+### RDB -> SQLite
 ## Application Definition
 
 TODO
