@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./UserIdentity.sol";
 
-contract OwnershipTransfer {
+contract OwnershipRecord {
     UserIdentity public userIdentitySC;
 
     enum EscrowState { Inactive, AwaitingPayment, AwaitingDelivery }
