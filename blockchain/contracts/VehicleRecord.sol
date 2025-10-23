@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.1;
 
 import "./UserIdentity.sol";
 
@@ -89,6 +89,18 @@ contract VehicleRecord {
      * @dev Links a new accident record. Only callable by LTA.
      */
     function linkAccidentRecord(string memory _vehicleId, string memory _accidentId) public onlyLTA {
-        vehicles[_vehicleId].accidentIds.push(_accidentId);
+    Vehicle storage vehicle = vehicles[_vehicleId];
+
+    // Ensure vehicle exists
+    require(bytes(vehicle.vehicleId).length != 0, "Vehicle not found");
+
+    // Check duplicates
+    for (uint256 i = 0; i < vehicle.accidentIds.length; i++) {
+        if (keccak256(bytes(vehicle.accidentIds[i])) == keccak256(bytes(_accidentId))) {
+            revert("Accident ID already linked");
+        }
     }
+
+    vehicle.accidentIds.push(_accidentId);
+}
 }
