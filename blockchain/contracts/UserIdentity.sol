@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.1;
 
 contract UserIdentity {
     enum Role { VEHICLE_OWNER, LTA, SPF, INSURANCE }
@@ -82,7 +82,7 @@ contract UserIdentity {
     function addSPF(address _address, string memory _username) 
         public isAdmin()
     {
-        spfsCount = ltasCount + 1;
+        spfsCount = spfsCount + 1;
         User memory user = User(spfsCount, _address, _username, Role.SPF );
         spfs[_address] = user;
         spfsAddresses.push(_address);
@@ -91,7 +91,7 @@ contract UserIdentity {
     function addInsurance(address _address, string memory _username) 
         public isAdmin()
     {
-        insurancesCount = ltasCount + 1;
+        insurancesCount = insurancesCount + 1;
         User memory user = User(insurancesCount, _address, _username, Role.INSURANCE );
         insurances[_address] = user;
         insurancesAddresses.push(_address);
