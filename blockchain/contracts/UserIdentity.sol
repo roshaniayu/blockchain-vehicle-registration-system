@@ -36,29 +36,33 @@ contract UserIdentity {
         require(admin == msg.sender, 'Admin Only');
         _;
     }
-
+    
     function verifyIsVehicleOwner(address _address) public view returns(bool) {
-        bool isValid = false;
-        isValid = vehicleOwners[_address].role == Role.VEHICLE_OWNER;
-        return isValid;
+    if (vehicleOwners[_address].userAddress == address(0)) {
+        return false; // user not registered
     }
+    return vehicleOwners[_address].role == Role.VEHICLE_OWNER;
+}
 
     function verifyIsLTA(address _address) public view returns(bool) {
-        bool isValid = false;
-        isValid = ltas[_address].role == Role.LTA;
-        return isValid;
+        if (ltas[_address].userAddress == address(0)) {
+        return false; // user not registered
+    }
+    return ltas[_address].role == Role.LTA;
     }
 
     function verifyIsSPF(address _address) public view returns(bool) {
-        bool isValid = false;
-        isValid = spfs[_address].role == Role.SPF;
-        return isValid;
+        if (spfs[_address].userAddress == address(0)) {
+        return false; // user not registered
     }
-
+    return spfs[_address].role == Role.SPF;
+    }
+    
     function verifyIsInsurance(address _address) public view returns(bool) {
-        bool isValid = false;
-        isValid = insurances[_address].role == Role.INSURANCE;
-        return isValid;
+         if (insurances[_address].userAddress == address(0)) {
+        return false; // user not registered
+    }
+    return insurances[_address].role == Role.INSURANCE;
     }
 
     function addVehicleOwner(address _address, string memory _username) 
@@ -128,4 +132,22 @@ contract UserIdentity {
         }
         return ret;
     }
+
+    function getUserId(address _address) public view returns (string memory) {
+    if (vehicleOwners[_address].userAddress != address(0)) {
+        return vehicleOwners[_address].username;
+    }
+    if (ltas[_address].userAddress != address(0)) {
+        return ltas[_address].username;
+    }
+    if (spfs[_address].userAddress != address(0)) {
+        return spfs[_address].username;
+    }
+    if (insurances[_address].userAddress != address(0)) {
+        return insurances[_address].username;
+    }
+    revert("User not found");
+}
+
+
 }
