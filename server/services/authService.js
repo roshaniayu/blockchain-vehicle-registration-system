@@ -92,5 +92,23 @@ module.exports = {
      */
     hashPassword: async (password) => {
         return await hashPassword(password);
+    },
+
+    /**
+     * Get user by ID
+     * @param {object} db - SQLite database connection
+     * @param {string} id - User ID
+     * @returns {Promise<object|null>} User object without password or null
+     */
+    getUserById: async (db, id) => {
+        const get = util.promisify(db.get).bind(db);
+        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType, Activate, WalletAddress FROM Users WHERE ID = ?';
+        
+        try {
+            const user = await get(sql, [id]);
+            return user || null;
+        } catch (error) {
+            throw error;
+        }
     }
 };

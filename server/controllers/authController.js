@@ -117,5 +117,61 @@ module.exports = {
             logger.error('Logout error', err.message);
             return errorResponse(res, 'Failed to logout.', 500, err.message);
         }
+    },
+
+    /**
+     * Verify token validity and return user info
+     * POST /auth/verify-token
+     * @param {object} req - Express request
+     * @param {object} res - Express response
+     */
+    verifyToken: async (req, res) => {
+        try {
+            const authHeader = req.headers.authorization;
+
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                logger.auth('VERIFY_TOKEN', 'unknown', 'FAILED - Missing authorization header');
+                return errorResponse(res, 'Missing or invalid authorization header.', 401, 'Authorization header must be in format: Bearer <token>');
+            }
+
+            const token = authHeader.slice(7);
+            const { verifyToken } = require('../utility/authUtils');
+            const decoded = verifyToken(token);
+
+            if (!decoded) {
+                logger.auth('VERIFY_TOKEN', 'unknown', 'FAILED - Invalid token');
+                return errorResponse(res, 'Invalid or expired token.', 401, 'Token is not valid');
+            }
+
+            // Fetch full user data from database
+            const user = await authService.getUserById(req.db, decoded.id);
+
+            if (!user) {
+                logger.auth('VERIFY_TOKEN', decoded.username || 'unknown', 'FAILED - User not found');
+                return errorResponse(res, 'User not found.', 401, 'The user associated with this token no longer exists');
+            }
+
+            // Check if account is active
+            if (!user.Activate) {
+                logger.auth('VERIFY_TOKEN', user.Username, 'FAILED - Account deactivated');
+                return errorResponse(res, 'Account deactivated.', 403, 'Your account has been deactivated');
+            }
+
+            logger.auth('VERIFY_TOKEN', user.Username, 'SUCCESS', { userId: user.ID, userType: user.UserType });
+            return successResponse(res, 'Token is valid.', 200, {
+                user: {
+                    id: user.ID,
+                    ownerId: user.OwnerID,
+                    username: user.Username,
+                    userType: user.UserType,
+                    walletAddress: user.WalletAddress,
+                    createdDate: user.CreatedDate,
+                    activate: user.Activate
+                }
+            });
+        } catch (err) {
+            logger.error('Token verification error', err.message);
+            return errorResponse(res, 'Authentication error.', 401, err.message);
+        }
     }
 };

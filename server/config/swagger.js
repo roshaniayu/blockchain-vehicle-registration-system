@@ -57,8 +57,17 @@ const options = {
             },
             UserType: {
               type: 'string',
-              enum: ['VehicleOwner', 'Admin', 'Inspector'],
+              enum: ['VehicleOwner', 'Admin', 'Inspector', 'LTA', 'Owner', 'Insurance'],
               description: 'Type of user',
+            },
+            WalletAddress: {
+              type: 'string',
+              nullable: true,
+              description: 'Blockchain wallet address',
+            },
+            Activate: {
+              type: 'boolean',
+              description: 'Account activation status',
             },
           },
         },
@@ -94,8 +103,13 @@ const options = {
             },
             userType: {
               type: 'string',
-              enum: ['VehicleOwner', 'Admin', 'Inspector'],
+              enum: ['VehicleOwner', 'Admin', 'Inspector', 'LTA', 'Owner', 'Insurance'],
               description: 'Type of user being registered',
+            },
+            walletAddress: {
+              type: 'string',
+              nullable: true,
+              description: 'Blockchain wallet address (optional)',
             },
           },
         },
@@ -123,6 +137,17 @@ const options = {
                   type: 'string',
                   format: 'uuid',
                   nullable: true,
+                },
+                walletAddress: {
+                  type: 'string',
+                  nullable: true,
+                },
+                createdDate: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+                activate: {
+                  type: 'boolean',
                 },
               },
             },

@@ -130,5 +130,51 @@ module.exports = (db) => {
      */
     router.post('/logout', authController.logout);
 
+    /**
+     * @swagger
+     * /api/auth/verify-token:
+     *   post:
+     *     tags:
+     *       - Authentication
+     *     summary: Verify token validity
+     *     description: Check if JWT token is valid and return full user information.
+     *     security:
+     *       - BearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Token is valid - returns user information
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: "success"
+     *                 message:
+     *                   type: string
+     *                   example: "Token is valid."
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     user:
+     *                       $ref: '#/components/schemas/User'
+     *       401:
+     *         description: Invalid or expired token
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     *       403:
+     *         description: Account deactivated
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
+    router.post('/verify-token', authController.verifyToken);
+
+    
+
     return router;
 };

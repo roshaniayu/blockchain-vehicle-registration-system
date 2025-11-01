@@ -23,7 +23,7 @@ module.exports = {
      */
     getUserById: async (db, id) => {
         const get = util.promisify(db.get).bind(db);
-        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType FROM Users WHERE ID = ?';
+        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType, Activate, WalletAddress FROM Users WHERE ID = ?';
         return get(sql, [id]);
     },
 
