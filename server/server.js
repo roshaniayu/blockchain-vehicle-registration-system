@@ -4,6 +4,9 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+// --- Import CORS Middleware ---
+const cors = require('cors');
+
 // --- Import Logger Utility ---
 const logger = require('./utility/logger');
 
@@ -49,6 +52,9 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 
 // --- GLOBAL MIDDLEWARE ---
 app.use(express.json());
+
+// --- Allows all origins ---
+app.use(cors()); 
 
 // --- REQUEST LOGGING MIDDLEWARE ---
 app.use((req, res, next) => {
