@@ -94,6 +94,10 @@ mapping(string => VehicleSale) public vehicleSales;
     });
 }
 
+    function isListed(string memory _vehicleId) external view returns (VehicleSale memory) {
+        return vehicleSales[_vehicleId];
+}
+
 function cancelSale(string memory _vehicleId) external {
     uint256 tokenId = vehicleToTokenId[_vehicleId];
     require(tokenId != 0, "Vehicle not found");
