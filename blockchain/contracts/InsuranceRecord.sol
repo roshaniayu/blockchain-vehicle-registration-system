@@ -26,6 +26,7 @@ contract InsuranceRecord {
         string insuranceId;
         string vehicleId;
         string ownerId;
+        string reason;
         uint256 claimedAmount;
         uint256 approvedAmount;
         bool isApproved;
@@ -85,6 +86,7 @@ contract InsuranceRecord {
         string memory _claimId,
         string memory _insuranceId,
         string memory _vehicleId,
+        string memory _reason,
         string memory _ownerId,
         uint256 _claimedAmount
     ) public {
@@ -96,6 +98,7 @@ contract InsuranceRecord {
             insuranceId: _insuranceId,
             vehicleId: _vehicleId,
             ownerId: _ownerId,
+            reason: _reason,
             claimedAmount: _claimedAmount,
             approvedAmount: 0,
             isApproved: false,
