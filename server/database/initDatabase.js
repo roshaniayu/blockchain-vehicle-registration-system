@@ -55,12 +55,12 @@ function initDatabase(db, callback) {
         const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
 
         const users = [
-            { id: randomUUID(), ownerId: owners[0].id, username: 'johndoe', password: hashedPassword1, salt: '', createdDate: now, userType: 'VehicleOwner' },
-            { id: randomUUID(), ownerId: owners[1].id, username: 'janesmith', password: hashedPassword1, salt: '', createdDate: now, userType: 'VehicleOwner' },
-            { id: randomUUID(), ownerId: owners[2].id, username: 'rjohnson', password: hashedPassword1, salt: '', createdDate: now, userType: 'VehicleOwner' },
-            { id: randomUUID(), ownerId: owners[3].id, username: 'emilychen', password: hashedPassword1, salt: '', createdDate: now, userType: 'VehicleOwner' },
-            { id: randomUUID(), ownerId: owners[4].id, username: 'mbrown', password: hashedPassword1, salt: '', createdDate: now, userType: 'VehicleOwner' },
-            { id: randomUUID(), ownerId: null, username: 'admin', password: hashedPasswordAdmin, salt: '', createdDate: now, userType: 'Admin' }
+            { id: randomUUID(), ownerId: owners[0].id, username: 'johndoe', password: hashedPassword1, walletAddress: '', createdDate: now, userType: 'VehicleOwner' },
+            { id: randomUUID(), ownerId: owners[1].id, username: 'janesmith', password: hashedPassword1, walletAddress: '', createdDate: now, userType: 'VehicleOwner' },
+            { id: randomUUID(), ownerId: owners[2].id, username: 'rjohnson', password: hashedPassword1, walletAddress: '', createdDate: now, userType: 'VehicleOwner' },
+            { id: randomUUID(), ownerId: owners[3].id, username: 'emilychen', password: hashedPassword1, walletAddress: '', createdDate: now, userType: 'VehicleOwner' },
+            { id: randomUUID(), ownerId: owners[4].id, username: 'mbrown', password: hashedPassword1, walletAddress: '', createdDate: now, userType: 'VehicleOwner' },
+            { id: randomUUID(), ownerId: null, username: 'admin', password: hashedPasswordAdmin, walletAddress: '', createdDate: now, userType: 'Admin' }
         ];
 
         let insertCount = 0;
@@ -104,8 +104,8 @@ function initDatabase(db, callback) {
         // Insert users
         users.forEach((user) => {
             db.run(
-                "INSERT OR IGNORE INTO Users (ID, OwnerID, Username, Password, Salt, CreatedDate, UserType) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                [user.id, user.ownerId, user.username, user.password, user.salt, user.createdDate, user.userType],
+                "INSERT OR IGNORE INTO Users (ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [user.id, user.ownerId, user.username, user.password, user.walletAddress, user.createdDate, user.userType],
                 (err) => {
                     if (err) console.error('⚠️ Error inserting user:', err.message);
                     checkAllInsertsCompleted();
@@ -138,8 +138,7 @@ function initDatabase(db, callback) {
               DOB TEXT NOT NULL,
               Nationality TEXT NOT NULL,
               PhoneNumber INTEGER NOT NULL,
-              Address TEXT NOT NULL,
-              FOREIGN KEY(LicenseID) REFERENCES DrivingLicenses(LicenseID)
+              Address TEXT NOT NULL
             );
         `, (err) => {
             if (err) return callback(err);
@@ -154,9 +153,10 @@ function initDatabase(db, callback) {
               OwnerID TEXT,
               Username TEXT UNIQUE NOT NULL,
               Password TEXT NOT NULL,
-              Salt TEXT NOT NULL,
+              WalletAddress TEXT NOT NULL,
               CreatedDate TEXT NOT NULL,
               UserType TEXT NOT NULL,
+              Activate Boolean DEFAULT FALSE NOT NULL,
               FOREIGN KEY(OwnerID) REFERENCES VehicleOwner(OwnerID)
             );
         `, (err) => {
