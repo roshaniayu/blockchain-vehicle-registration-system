@@ -104,6 +104,7 @@ contract InsuranceRecord {
             isApproved: false,
             isSettled: false
         });
+        vehicleRecordSC.linkClaim(_vehicleId, _claimId);
     }
 
     /**
@@ -140,7 +141,7 @@ contract InsuranceRecord {
         vehicle.currentOwnerAddress.transfer(claim.approvedAmount);
 
         claim.isSettled = true;
-        vehicleRecordSC.updateClaimSettlement(claim.vehicleId, claim.claimId, claim.approvedAmount);
+        vehicleRecordSC.updateClaimSettlement(claim.vehicleId, claim.approvedAmount);
     }
 
     /**
