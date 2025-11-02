@@ -32,6 +32,11 @@ module.exports = {
                 return errorResponse(res, 'Invalid username or password.', 401, null);
             }
 
+            if (!user.Activate) {
+                logger.auth('LOGIN', username, 'FAILED - Account is not activated yet.');
+                return errorResponse(res, 'Your account is not activated yet. Please wait for the "Land Transport Authority" officer to activate your account.', 400, null);
+            }
+
             // Generate JWT token
             const token = generateToken(user);
 
