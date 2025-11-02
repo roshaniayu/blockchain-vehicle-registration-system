@@ -14,7 +14,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
+        url: 'http://localhost:9000',
         description: 'Local development server',
       },
       {
@@ -211,6 +211,64 @@ const options = {
               type: 'string',
               format: 'date',
               description: 'Date license expires (YYYY-MM-DD)',
+            },
+          },
+        },
+        Vehicle: {
+          type: 'object',
+          properties: {
+            VehicleID: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Unique vehicle identifier',
+            },
+            OwnerID: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              description: 'Reference to VehicleOwner',
+            },
+            ForSale: {
+              type: 'boolean',
+              description: 'Indicates if the vehicle is currently for sale',
+            },
+          },
+        },
+        NewVehicle: {
+          type: 'object',
+          required: ['vehicleID'],
+          properties: {
+            vehicleID: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Unique identifier for the new vehicle',
+            },
+            ownerID: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              description: 'Optional: ID of the initial owner',
+            },
+          },
+        },
+        UpdateVehicleOwner: {
+          type: 'object',
+          required: ['newOwnerID'],
+          properties: {
+            newOwnerID: {
+              type: 'string',
+              format: 'uuid',
+              description: 'The ID of the new owner for the vehicle',
+            },
+          },
+        },
+        UpdateVehicleForSaleStatus: {
+          type: 'object',
+          required: ['forSale'],
+          properties: {
+            forSale: {
+              type: 'boolean',
+              description: 'Boolean indicating if the vehicle is for sale (true) or not (false)',
             },
           },
         },
