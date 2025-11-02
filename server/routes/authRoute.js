@@ -172,7 +172,7 @@ module.exports = (db) => {
      *             schema:
      *               $ref: '#/components/schemas/ErrorResponse'
      */
-    router.post('/verify-token', authController.verifyToken);
+    router.get('/verify-token', authController.verifyToken);
 
     
 
