@@ -77,6 +77,29 @@ module.exports = {
     },
 
     /**
+     * Updates an existing user's details.
+     * @param {object} db - The SQLite database connection object.
+     * @param {string} id - The UUID of the user to update.
+     * @param {object} updates - Object containing fields to update (Username, UserType).
+     * @returns {Promise<object>} A promise that resolves with the number of affected rows.
+     */
+    accActivate: async (db, id) => {
+        const sql = 'UPDATE Users SET Activate = true WHERE ID = $1 OR OwnerID = $1';
+        
+        return new Promise((resolve, reject) => {
+            db.run(sql, [id], function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                if (this.changes === 0) {
+                    return reject(new Error(`User with ID ${id} not found or no changes were made.`));
+                }
+                resolve({ ID: id, changes: this.changes });
+            });
+        });
+    },
+
+    /**
      * Deletes a user from the database by ID.
      * @param {object} db - The SQLite database connection object.
      * @param {string} id - The UUID of the user to delete.
