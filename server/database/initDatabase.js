@@ -11,7 +11,7 @@ function initDatabase(db, callback) {
 
     const now = new Date().toISOString();
     let tableCount = 0;
-    let totalTables = 3;
+    let totalTables = 4;
 
     /**
      * Helper function to handle table creation completion
@@ -164,6 +164,19 @@ function initDatabase(db, callback) {
             console.log('✨ Table "Users" is ready.');
             checkAllTablesCreated();
         });
+    });
+
+    // 3. Vehicle Table
+    db.run(`
+        CREATE TABLE IF NOT EXISTS Vehicles (
+            VehicleID TEXT NOT NULL PRIMARY KEY,
+            OwnerID TEXT,
+            ForSale Boolean DEFAULT FALSE NOT NULL
+        );
+    `, (err) => {
+        if (err) return callback(err);
+        console.log('✨ Table "Vehicle" is ready.');
+        checkAllTablesCreated();
     });
 }
 

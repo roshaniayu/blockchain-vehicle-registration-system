@@ -20,6 +20,7 @@ const runInitialization = require('./database/initDatabase');
 const authRoutes = require('./routes/authRoute');
 const userRoutes = require('./routes/userRoute');
 const ownerRoutes = require('./routes/vehicleOwnerRoute');
+const vehicleRoutes = require('./routes/vehicleRoute');
 const licenseRoutes = require('./routes/drivingLicenseRoute');
 // ---------------------------
 
@@ -115,6 +116,7 @@ apiRouter.get('/init', (req, res) => {
 apiRouter.use('/auth', authRoutes(db));
 apiRouter.use('/users', userRoutes(db));
 apiRouter.use('/owners', ownerRoutes(db));
+apiRouter.use('/vehicles', vehicleRoutes(db));
 apiRouter.use('/licenses', licenseRoutes(db));
 
 // --- MOUNT THE API ROUTER ---
