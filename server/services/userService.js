@@ -10,7 +10,7 @@ module.exports = {
      */
     getAllUsers: async (db) => {
         const all = util.promisify(db.all).bind(db);
-        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType FROM Users ORDER BY Username';
+        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType, Activate, WalletAddress FROM Users ORDER BY CreatedDate DESC';
         return all(sql); 
     },
 
@@ -34,15 +34,15 @@ module.exports = {
      * @returns {Promise<object>} A promise that resolves with the created user's data.
      */
     createUser: async (db, userData) => {
-        const { ID, OwnerID, Username, Password, Salt, CreatedDate, UserType } = userData;
+        const { ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType } = userData;
         
         const sql = `
-            INSERT INTO Users (ID, OwnerID, Username, Password, Salt, CreatedDate, UserType) 
+            INSERT INTO Users (ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType) 
             VALUES (?, ?, ?, ?, ?, ?, ?);
         `;
         
         return new Promise((resolve, reject) => {
-            db.run(sql, [ID, OwnerID, Username, Password, Salt, CreatedDate, UserType], function (err) {
+            db.run(sql, [ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType], function (err) {
                 if (err) {
                     return reject(err);
                 }

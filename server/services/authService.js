@@ -36,7 +36,8 @@ module.exports = {
                 OwnerID: user.OwnerID,
                 Username: user.Username,
                 CreatedDate: user.CreatedDate,
-                UserType: user.UserType
+                UserType: user.UserType,
+                Activate: user.Activate
             };
         } catch (error) {
             throw error;
@@ -50,15 +51,14 @@ module.exports = {
      * @returns {Promise<object>} Created user without password
      */
     registerUser: async (db, userData) => {
-        const { ID, OwnerID, Username, Password, CreatedDate, UserType } = userData;
+        const { ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType } = userData;
         
         const sql = `
-            INSERT INTO Users (ID, OwnerID, Username, Password, Salt, CreatedDate, UserType) 
-            VALUES (?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO Users (ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType, Activate) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         `;
-        
         return new Promise((resolve, reject) => {
-            db.run(sql, [ID, OwnerID, Username, Password, '', CreatedDate, UserType], function (err) {
+            db.run(sql, [ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType, UserType.includes(["LTA"]) ? true : false], function (err) {
                 if (err) {
                     return reject(err);
                 }
