@@ -15,7 +15,7 @@ contract VehicleRecord {
         uint256 coeExpiryDate;              // COE expiry date (timestamp)
         uint256 manufactureDate;            // Manufacturing year/date
         string manufactureCompany;          // Company name
-        uint256 modelNo;                    // Model number
+        string modelNo;                    // Model number
         bool vehicleSignature;              // LTA verification flag
         string[] accidentIds;             // Linked traffic/accident IDs
         string[] claimIds;                // 🔹 new
@@ -45,7 +45,7 @@ contract VehicleRecord {
         uint256 _coeExpiryDate,
         uint256 _manufactureDate,
         string memory _company,
-        uint256 _modelNo
+        string memory _modelNo
     ) public onlyLTA {
         require(bytes(vehicles[_vehicleId].vehicleId).length == 0, "Vehicle already exists");
         require(_coeExpiryDate > _coeStartDate, "Invalid COE duration");
