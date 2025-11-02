@@ -153,4 +153,14 @@ contract InsuranceRecord {
                 block.timestamp <= ins.policyExpiryDate &&
                 ins.isActive);
     }
+
+    function getInsuranceInfo(string memory _insuranceId) public view returns (Insurance memory) {
+        require(bytes(insurances[_insuranceId].insuranceId).length != 0, "Insurance Policy not found");
+        return insurances[_insuranceId];
+    }
+
+    function getClaimInfo(string memory _claimId) public view returns (Claim memory) {
+        require(bytes(claims[_claimId].claimId).length != 0, "Claim not found");
+        return claims[_claimId];
+    }
 }
