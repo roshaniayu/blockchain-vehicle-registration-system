@@ -20,7 +20,13 @@ module.exports = {
      */
     getOwnerById: async (db, ownerId) => {
         const get = util.promisify(db.get).bind(db);
-        const sql = 'SELECT * FROM VehicleOwner WHERE OwnerID = ?';
+        const sql = `
+        SELECT vo.*, u.WalletAddress 
+        FROM VehicleOwner AS vo
+        LEFT JOIN Users AS u 
+        ON vo.OwnerID = u.OwnerID
+        WHERE vo.OwnerID = ?
+        `;
         return get(sql, [ownerId]);
     },
 
