@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const ownerService = require('../services/vehicleOwnerService');
 const { successResponse, errorResponse } = require('../contracts/responseFormat');
 const { generateToken } = require('../utility/authUtils');
 const { randomUUID } = require('crypto');
@@ -63,7 +64,7 @@ module.exports = {
      * @param {object} res - Express response
      */
     register: async (req, res) => {
-        const { username, password, ownerID, userType } = req.body;
+        const { username, password, walletAddress, userType, LicenseID, Name, DOB, Nationality, PhoneNumber, Address } = req.body;
 
         // Validation
         if (!username || !password) {
@@ -75,7 +76,7 @@ module.exports = {
             logger.auth('REGISTER', username, 'FAILED - Password too short');
             return errorResponse(res, 'Password must be at least 6 characters long.', 400, null);
         }
-
+        
         try {
             // Check if username already exists
             const usernameAlreadyExists = await authService.usernameExists(req.db, username);
@@ -86,15 +87,37 @@ module.exports = {
 
             // Hash password
             const hashedPassword = await authService.hashPassword(password);
+            let owner;
+            
+            // Create owner
+            if(userType === "VEHICLE_OWNER"){
+                if (!LicenseID || !Name || !DOB || !Nationality || !PhoneNumber || !Address) {
+                    logger.warn('Create owner failed - missing required fields');
+                    return errorResponse(res, 'Missing one or more required fields.', 400);
+                }
+           
+            const ownerData = {
+                OwnerID: randomUUID(),
+                LicenseID,
+                Name,
+                DOB,
+                Nationality,
+                PhoneNumber,
+                Address
+            };
+             owner = await ownerService.createOwner(req.db, ownerData);
+             logger.database('INSERT', 'VehicleOwner', `SUCCESS - Created owner ${owner.OwnerID}`, { Name, LicenseID });
+            }
 
             // Register user
             const userData = {
                 ID: randomUUID(),
-                OwnerID: ownerID || null,
+                OwnerID: owner?.OwnerID || null,
                 Username: username,
                 Password: hashedPassword,
+                WalletAddress: walletAddress || "",
                 CreatedDate: new Date().toISOString(),
-                UserType: userType || 'VehicleOwner'
+                UserType: userType || 'VEHICLE_OWNER'
             };
 
             const newUser = await authService.registerUser(req.db, userData);
