@@ -15,7 +15,7 @@ contract VehicleRecord {
         uint256 coeExpiryDate;              // COE expiry date (timestamp)
         uint256 manufactureDate;            // Manufacturing year/date
         string manufactureCompany;          // Company name
-        uint256 modelNo;                    // Model number
+        string modelNo;                    // Model number
         bool vehicleSignature;              // LTA verification flag
         string[] accidentIds;             // Linked traffic/accident IDs
         string[] claimIds;                // 🔹 new
@@ -37,7 +37,7 @@ contract VehicleRecord {
     /**
      * @dev Register a new vehicle by the LTA.
      */
- function addVehicle(
+    function addVehicle(
         string memory _vehicleId,
         string memory _ownerId,
         address payable _ownerAddress,
@@ -45,7 +45,7 @@ contract VehicleRecord {
         uint256 _coeExpiryDate,
         uint256 _manufactureDate,
         string memory _company,
-        uint256 _modelNo
+        string memory _modelNo
     ) public onlyLTA {
         require(bytes(vehicles[_vehicleId].vehicleId).length == 0, "Vehicle already exists");
         require(_coeExpiryDate > _coeStartDate, "Invalid COE duration");
@@ -89,11 +89,9 @@ contract VehicleRecord {
     // called by InsuranceRecord when a claim is settled
     function updateClaimSettlement(
         string memory _vehicleId,
-        string memory _claimId,
         uint256 _amount
     ) external {
         require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
-        vehicles[_vehicleId].claimIds.push(_claimId);
         vehicles[_vehicleId].totalClaimsReceived += _amount;
     }
 
@@ -104,6 +102,15 @@ contract VehicleRecord {
         require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
         vehicles[_vehicleId].accidentIds.push(_accidentId);
     }
+
+    /**
+     * @dev Link claim record.
+     */
+    function linkClaim(string memory _vehicleId, string memory _claimId) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        vehicles[_vehicleId].claimIds.push(_claimId);
+    }
+
 
     /**
      * @dev Link insurance record with vehicle.
@@ -124,7 +131,7 @@ contract VehicleRecord {
     /**
      * @dev Fetch vehicle info by ID.
      */
-      function getTotalFinesPaid(string memory _vehicleId) public view returns (uint256) {
+    function getTotalFinesPaid(string memory _vehicleId) public view returns (uint256) {
         return vehicles[_vehicleId].totalFinesPaid;
     }
 
@@ -144,6 +151,6 @@ contract VehicleRecord {
     function isVehicleExist(string memory vehicleId) public view returns (bool) {
     // Check if the vehicle record exists by verifying non-empty fields or registration status
     return bytes(vehicles[vehicleId].vehicleId).length > 0;
-}
+    }
 
 }

@@ -26,6 +26,7 @@ contract InsuranceRecord {
         string insuranceId;
         string vehicleId;
         string ownerId;
+        string reason;
         uint256 claimedAmount;
         uint256 approvedAmount;
         bool isApproved;
@@ -85,6 +86,7 @@ contract InsuranceRecord {
         string memory _claimId,
         string memory _insuranceId,
         string memory _vehicleId,
+        string memory _reason,
         string memory _ownerId,
         uint256 _claimedAmount
     ) public {
@@ -96,11 +98,13 @@ contract InsuranceRecord {
             insuranceId: _insuranceId,
             vehicleId: _vehicleId,
             ownerId: _ownerId,
+            reason: _reason,
             claimedAmount: _claimedAmount,
             approvedAmount: 0,
             isApproved: false,
             isSettled: false
         });
+        vehicleRecordSC.linkClaim(_vehicleId, _claimId);
     }
 
     /**
@@ -137,7 +141,7 @@ contract InsuranceRecord {
         vehicle.currentOwnerAddress.transfer(claim.approvedAmount);
 
         claim.isSettled = true;
-        vehicleRecordSC.updateClaimSettlement(claim.vehicleId, claim.claimId, claim.approvedAmount);
+        vehicleRecordSC.updateClaimSettlement(claim.vehicleId, claim.approvedAmount);
     }
 
     /**
@@ -148,5 +152,15 @@ contract InsuranceRecord {
         return (block.timestamp >= ins.policyStartDate &&
                 block.timestamp <= ins.policyExpiryDate &&
                 ins.isActive);
+    }
+
+    function getInsuranceInfo(string memory _insuranceId) public view returns (Insurance memory) {
+        require(bytes(insurances[_insuranceId].insuranceId).length != 0, "Insurance Policy not found");
+        return insurances[_insuranceId];
+    }
+
+    function getClaimInfo(string memory _claimId) public view returns (Claim memory) {
+        require(bytes(claims[_claimId].claimId).length != 0, "Claim not found");
+        return claims[_claimId];
     }
 }

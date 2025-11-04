@@ -59,4 +59,9 @@ contract TrafficRecord {
         vehicleRecord.updateFinePayment(v.vehicleId, v.amount);
         emit FinePaid(_violationId, msg.sender, msg.value);
     }
+
+    function getTicketInfo(string memory _violationId) public view returns (Violation memory) {
+        require(bytes(violations[_violationId].violationId).length != 0, "Ticket not found");
+        return violations[_violationId];
+    }
 }
