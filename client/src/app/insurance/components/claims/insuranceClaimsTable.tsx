@@ -1,29 +1,32 @@
 "use client";
 
-import { Button, ButtonOutline } from "@/components/ui/buttons/buttons";
+import { useEffect, useState } from "react";
+import _, { upperCase } from "lodash";
 
 // Components
 import { SearchInput } from "@/components/ui/inputs/SearchInput";
-
-// APIs
-import { useVehicleList } from "@/utils/apiHooks/useVehicle";
-
-// Web3
-import * as VehicleRecord from "@/utils/web3/VehicleRecord";
-import * as InsuranceRecord from "@/utils/web3/InsuranceRecord";
-import { useCallback, useEffect, useState } from "react";
-import { VehicleInfo_T } from "@/types/vehicles";
+import { Button, ButtonOutline } from "@/components/ui/buttons/buttons";
 import { NumberInput } from "@/components/ui/inputs/numberInput";
-import _, { upperCase } from "lodash";
+import { OwnerIdToName } from "@/components/features/ownerIdToName";
+
+// Icons
 import {
   Check_Icon,
   Eye_Icon,
   Thumb_Icon,
   Warning_Icon,
 } from "@/components/icons/iconPack";
-import { useGetUserByID } from "@/utils/apiHooks/useUsers";
-import { OwnerIdToName } from "@/components/features/ownerIdToName";
+
+// APIs
+import { useVehicleList } from "@/utils/apiHooks/useVehicle";
 import { useLogin } from "@/utils/apiHooks/useAuth";
+
+// Web3
+import * as VehicleRecord from "@/utils/web3/VehicleRecord";
+import * as InsuranceRecord from "@/utils/web3/InsuranceRecord";
+
+// Types
+import { VehicleInfo_T } from "@/types/vehicles";
 
 const tableColumns: {
   title: string;
@@ -42,7 +45,7 @@ const tableColumns: {
 export function InsuranceClaimListTable() {
   const [keyword, setKeyword] = useState("");
 
-  // Fetch from DB.
+  // REST Api
   const { data: vehicleList, isLoading } = useVehicleList();
 
   if (isLoading) return <> Loading... </>;
@@ -94,11 +97,10 @@ function RowTemplate(props: { vehicleId: string }) {
   const { vehicleId } = props;
 
   // Smart Contract
-  const sc_GetVehicleInfo = VehicleRecord.use_SC_GetVehicleInfo();
+  const sc_GetVehicleInfo = VehicleRecord.useSC_GetVehicleInfo();
 
-  // Get Vehicle Info
   useEffect(() => {
-    sc_GetVehicleInfo.get(vehicleId);
+    sc_GetVehicleInfo.get(vehicleId); // Get Vehicle Info from Smart Contract
   }, [vehicleId]);
 
   if (!sc_GetVehicleInfo.data) return null;
@@ -129,9 +131,9 @@ export function TicketInfo(props: {
   const { data: loginInfo } = useLogin();
 
   // Smart contracts
-  const sc_GetClaimInfo = InsuranceRecord.use_SC_GetClaimInfo();
-  const sc_SettleClaim = InsuranceRecord.use_SC_SettleClaim();
-  const sc_ApproveClaim = InsuranceRecord.use_SC_ApproveClaim();
+  const sc_GetClaimInfo = InsuranceRecord.useSC_GetClaimInfo();
+  const sc_SettleClaim = InsuranceRecord.useSC_SettleClaim();
+  const sc_ApproveClaim = InsuranceRecord.useSC_ApproveClaim();
 
   const handleSettleClaim = async (
     claimId?: string,

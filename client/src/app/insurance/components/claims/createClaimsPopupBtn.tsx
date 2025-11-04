@@ -12,7 +12,6 @@ export function CreateClaimsPopupBtn(props: {
   insuranceId: string;
   ownerId: string;
 }) {
-  // States
   const [isOpen, setIsOpen] = useState(false);
 
   return (

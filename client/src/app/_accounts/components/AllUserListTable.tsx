@@ -23,7 +23,7 @@ export function AllUserListTable() {
   const [keyword, setKeyword] = useState("");
 
   // Smart Contracts
-  const sc_AddUser = UserIdentity.use_SC_AddUser();
+  const sc_AddUser = UserIdentity.useSC_AddUser();
 
   // REST APIs
   const {

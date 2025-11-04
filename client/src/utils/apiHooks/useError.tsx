@@ -1,8 +1,12 @@
+"use client";
+
+import { useContext } from "react";
+
+// Context providers
 import {
   ContractContext,
   ContractContextType,
 } from "@/utils/providers/contextProvider";
-import { useContext } from "react";
 
 // Assuming SmartContractErrorProvider is in the same directory or adjust the import path
 

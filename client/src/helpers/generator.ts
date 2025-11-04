@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Generates a unique, formatted policy ID.
  * Format: P-YYYYMMDD-XXXXX (e.g., P-20251029-A7C9F)

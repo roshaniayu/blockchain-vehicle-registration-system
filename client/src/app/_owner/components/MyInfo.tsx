@@ -1,15 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
+
+// API hooks
 import { useLogin } from "@/utils/apiHooks/useAuth";
 import { useVehicleOwnerInfo } from "@/utils/apiHooks/useVehicle";
-import { useEffect } from "react";
 
 // Components
 import PersonalDetail from "./_PersonalDetail";
 import AccountDetail from "./_AccountDetail";
-import LicenseInformation from "./_LicenseDetail";
 
 export function MyInfo() {
+  // REST API
   const { data: userInfo } = useLogin();
   const { data: vehicleOwnerInfo, refetch: refetchVOwnerInfo } =
     useVehicleOwnerInfo(userInfo.data.user.ownerId);

@@ -1,10 +1,18 @@
 "use client";
 
-import OwnershipArtifact from "@/contracts/OwnershipRecord.json";
-import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
-import Web3 from "web3";
 import { useCallback, useState } from "react";
+import Web3 from "web3";
+
+// Error Handler Context
 import { useContractError } from "@/utils/apiHooks/useError";
+
+// Contracts
+import OwnershipArtifact from "@/contracts/OwnershipRecord.json";
+
+// Connections
+import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
+
+// Types
 import {
   ListVehicleForSale_T,
   MintVehicleOwnership_T,
@@ -12,7 +20,7 @@ import {
 } from "@/types/ownership";
 
 // onlyLTA
-export function use_SC_MintVehicleOwnership() {
+export function useSC_MintVehicleOwnership() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(false);
@@ -49,7 +57,7 @@ export function use_SC_MintVehicleOwnership() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_GetSaleInfo() {
+export function useSC_GetSaleInfo() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<SaleInfo_T | null>();
   const [loading, setLoading] = useState(false);
@@ -78,14 +86,13 @@ export function use_SC_GetSaleInfo() {
   return { data, loading, get: smartContract };
 }
 
-export function use_SC_ListVehicleForSale() {
+export function useSC_ListVehicleForSale() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<string | null>();
   const [loading, setLoading] = useState(false);
 
   const smartContract = useCallback(async (dataset: ListVehicleForSale_T) => {
     setLoading(true); // Set Loading
-    console.log(dataset);
     const contract = await InitWeb3Contract(OwnershipArtifact);
     if (!contract) return;
 
@@ -111,7 +118,7 @@ export function use_SC_ListVehicleForSale() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_CancelSale() {
+export function useSC_CancelSale() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(false);
@@ -144,7 +151,7 @@ export function use_SC_CancelSale() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_PurchaseVehicle() {
+export function useSC_PurchaseVehicle() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(false);
@@ -184,7 +191,7 @@ export function use_SC_PurchaseVehicle() {
 }
 
 // onlyLTA
-export function use_SC_RevokeOwnership() {
+export function useSC_RevokeOwnership() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(false);
@@ -217,7 +224,7 @@ export function use_SC_RevokeOwnership() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_TansferOwnershipRecord() {
+export function useSC_TansferOwnershipRecord() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(false);
@@ -254,7 +261,7 @@ export function use_SC_TansferOwnershipRecord() {
 }
 
 // onlyLTA
-export function use_SC_GetVehicleOwnership() {
+export function useSC_GetVehicleOwnership() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<string | null>();
   const [loading, setLoading] = useState(false);

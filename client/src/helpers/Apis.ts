@@ -1,23 +1,7 @@
 "use client";
 
-// Custom error structure for improved HTTP error details
-interface CustomError extends Error {
-  status?: number;
-  data?: any; // Raw response data
-}
-
-// Fetch options type
-type FetcherOptions = RequestInit;
-
-// Interfaces for SWR Mutation Example
-interface PostPayload {
-  title: string;
-  body: string;
-  userId: number;
-}
-interface PostResponse extends PostPayload {
-  id: number;
-}
+// Types
+import { CustomError, FetcherOptions } from "@/types/apis";
 
 const _requestHandler = async <T = any>(
   url: string,

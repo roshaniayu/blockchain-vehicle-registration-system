@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+// Components
 import { OwnerIdToName } from "../features/ownerIdToName";
 
 export function VehicleCard(props: {
@@ -30,9 +30,6 @@ export function VehicleCard(props: {
 
   return (
     <div className="w-full border-gray-200 rounded-lg shadow-sm bg-black">
-      {/* <div className="relative w-full h-64" >
-        <Image className="rounded-t-lg" src={image ?? ""} alt="" fill />
-      </div> */}
       <div className="p-5">
         <div className="rounded-xl text-center mb-2 text-xs opacity-50 px-4 py-2  bg-zinc-800 flex justify-center gap-2">
           Current Owner: <OwnerIdToName ownerID={ownerId} />

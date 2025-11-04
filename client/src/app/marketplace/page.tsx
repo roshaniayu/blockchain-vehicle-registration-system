@@ -1,5 +1,6 @@
 "use client";
 
+// Components
 import { VehiclesForSalePage } from "../vehicles/page";
 
 export default function MarketplacePage() {

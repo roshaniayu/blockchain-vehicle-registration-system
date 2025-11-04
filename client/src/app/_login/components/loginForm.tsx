@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
+
+// Components
 import { ButtonOutline } from "@/components/ui/buttons/buttons";
 import { SimpleError } from "@/components/ui/errors/simpleError";
 import { PasswordInput } from "@/components/ui/inputs/passwordInput";
 import { TextInput } from "@/components/ui/inputs/textInput";
+
+// API hooks
 import { useLogin } from "@/utils/apiHooks/useAuth";
-import { useState } from "react";
 
 interface loginInfo_T {
   username: string;
@@ -52,7 +56,7 @@ export function LoginForm(props: { registerForm: () => void }) {
         </form>
 
         <div className="flex gap-2 text-sm font-light text-gray-400 items-center justify-center">
-          Don't have an account?
+          Don&apos;t have an account?
           <span
             className="font-medium text-primary-600 hover:underline text-primary-500 cursor-pointer text-blue-500"
             onClick={registerForm}

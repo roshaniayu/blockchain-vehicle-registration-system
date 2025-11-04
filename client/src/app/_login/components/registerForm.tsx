@@ -9,8 +9,11 @@ import { PasswordInput } from "@/components/ui/inputs/passwordInput";
 import { TextInput } from "@/components/ui/inputs/textInput";
 import { CurrentWalletAddress } from "@/components/features/walletAddress";
 
-// API hook
+// API hooks
 import { useRegister } from "@/utils/apiHooks/useAuth";
+
+// Web3
+import * as UserIdentity from "@/utils/web3/UserIdentity";
 
 // Constant
 import { UserAccountTypes } from "@/helpers/constants";
@@ -19,19 +22,16 @@ import { UserAccountTypes } from "@/helpers/constants";
 import { RegisterInfo_T, UserType_T } from "@/types/auth";
 import { SimpleError } from "@/components/ui/errors/simpleError";
 
-// Web3
-import * as UserIdentity from "@/utils/web3/UserIdentity";
-
 export function RegisterForm(props: { loginForm: () => void }) {
   const { loginForm: redirectLoginForm } = props;
 
-  const [confirmPassword, setConfirmPassowrd] = useState("");
+  const [, setConfirmPassowrd] = useState("");
   const [inputInfo, setInputInfo] = useState<RegisterInfo_T>({
     userType: "VEHICLE_OWNER",
   });
 
   // Smart Contracts
-  const sc_AddUser = UserIdentity.use_SC_AddUser();
+  const sc_AddUser = UserIdentity.useSC_AddUser();
 
   // APIs
   const { error: registerError, refetch: refetchRegister } =

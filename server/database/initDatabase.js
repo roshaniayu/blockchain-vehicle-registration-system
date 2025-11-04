@@ -1,6 +1,3 @@
-const { randomUUID } = require('crypto');
-const bcrypt = require('bcryptjs');
-
 /**
  * Executes all necessary schema creation and sample data insertion.
  * @param {sqlite3.Database} db - The global database connection instance.
@@ -8,9 +5,7 @@ const bcrypt = require('bcryptjs');
  */
 function initDatabase(db, callback) {
     console.log('🚀 Running database schema check and setup...');
-
-    const now = new Date().toISOString();
-
+    
     db.serialize(() => {
         // 2. VehicleOwner Table
         db.run(`

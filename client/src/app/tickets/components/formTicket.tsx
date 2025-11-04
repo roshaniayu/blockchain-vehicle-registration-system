@@ -32,8 +32,8 @@ export function FormTicket() {
   const { data: userInfo } = useGetUserByID(selectedUser);
 
   // Smart Contracts
-  const sc_GetVehicleInfo = VehicleRecord.use_SC_GetVehicleInfo();
-  const sc_RecordViolation = TrafficRecord.use_SC_RecordViolation();
+  const sc_GetVehicleInfo = VehicleRecord.useSC_GetVehicleInfo();
+  const sc_RecordViolation = TrafficRecord.useSC_RecordViolation();
 
   const handlePolicyInfo = (
     key: keyof TicketForm_T,

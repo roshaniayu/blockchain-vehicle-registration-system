@@ -1,10 +1,18 @@
 "use client";
 
-import Web3 from "web3";
 import { useCallback, useState } from "react";
+import Web3 from "web3";
 
+// Error Handler Context
+import { useContractError } from "@/utils/apiHooks/useError";
+
+// Contracts
 import InsuranceRecordArtifact from "@/contracts/InsuranceRecord.json";
+
+// Connections
 import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
+
+// Types
 import {
   ClaimForm_T,
   ClaimInfo_T,
@@ -12,9 +20,7 @@ import {
   PolicyInfo_T,
 } from "@/types/insurance";
 
-import { useContractError } from "@/utils/apiHooks/useError";
-
-export function use_SC_AddInsurance() {
+export function useSC_AddInsurance() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<string | null>();
@@ -57,7 +63,7 @@ export function use_SC_AddInsurance() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_RequestClaim() {
+export function useSC_RequestClaim() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<string | null>();
@@ -97,7 +103,7 @@ export function use_SC_RequestClaim() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_ApproveClaim() {
+export function useSC_ApproveClaim() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<string | null>();
@@ -131,7 +137,7 @@ export function use_SC_ApproveClaim() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_SettleClaim() {
+export function useSC_SettleClaim() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<string | null>();
@@ -168,22 +174,7 @@ export function use_SC_SettleClaim() {
   return { data, loading, send: smartContract };
 }
 
-// export async function IsPolicyActive(insuranceId: string) {
-//   const contract = await InitWeb3Contract(InsuranceRecordArtifact);
-//   if (!contract) return;
-
-//   // Request account access and get the current user's address (Signer equivalent)
-//   const accounts = await (window as any).ethereum.request({
-//     method: "eth_requestAccounts",
-//   });
-//   const userAddress = accounts[0];
-
-//   return await contract.methods
-//     .isPolicyActive(insuranceId)
-//     .send({ from: userAddress });
-// }
-
-export function use_SC_GetInsuranceInfo() {
+export function useSC_GetInsuranceInfo() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<InsuranceInfo_T | null>();
   const [loading, setLoading] = useState(false);
@@ -213,7 +204,7 @@ export function use_SC_GetInsuranceInfo() {
   return { data, loading, get: smartContract };
 }
 
-export function use_SC_GetClaimInfo() {
+export function useSC_GetClaimInfo() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<ClaimInfo_T | null>();
   const [loading, setLoading] = useState(false);
