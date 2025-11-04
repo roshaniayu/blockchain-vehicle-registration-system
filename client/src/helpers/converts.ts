@@ -1,3 +1,5 @@
+"use client";
+
 export function shortenString(longString: string) {
   const minLength = 8; // We need at least 8 characters to show 4 + 4
 

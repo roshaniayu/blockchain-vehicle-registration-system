@@ -5,29 +5,31 @@ import _ from "lodash";
 
 // Components
 import { TextInput } from "@/components/ui/inputs/textInput";
+import { ButtonOutline } from "@/components/ui/buttons/buttons";
+import { Dropdown } from "@/components/ui/inputs/dropdown";
+import SelectedUserInfo from "@/components/features/profile/selectedUserInfo";
 
 // Web3
 import * as VehicleRecord from "@/utils/web3/VehicleRecord";
 import * as UserIdentity from "@/utils/web3/UserIdentity";
 
-// API Hook
+// API Hooks
 import { useVehicleCreate } from "@/utils/apiHooks/useVehicle";
-import { ButtonOutline } from "@/components/ui/buttons/buttons";
-import { Dropdown } from "@/components/ui/inputs/dropdown";
+import { useGetUserByID } from "@/utils/apiHooks/useUsers";
+
+// Helpers
+import { shortenString } from "@/helpers/converts";
 
 // Types
-import { useGetUserByID } from "@/utils/apiHooks/useUsers";
-import { AddNewVehicle_T } from "@/types/vehicles";
-import { shortenString } from "@/helpers/converts";
 import { UserType_T } from "@/types/auth";
-import SelectedUserInfo from "@/components/features/profile/selectedUserInfo";
+import { AddNewVehicle_T } from "@/types/vehicles";
 
 export function FormCreateVechicle() {
   // React States
   const [selectedUser, setSelectedUser] = useState<string>();
   const [inputInfo, setInputInfo] = useState<Partial<AddNewVehicle_T>>();
 
-  // APIs
+  // REST APIs
   const { data: userInfo } = useGetUserByID(selectedUser);
   const { refetch } = useVehicleCreate({
     vehicleID: inputInfo?.vehicleId,
@@ -35,7 +37,7 @@ export function FormCreateVechicle() {
   });
 
   // Smart Contracts
-  const sc_GetAllUsers = UserIdentity.use_SC_GetAllUsersByTypes();
+  const sc_GetAllUsers = UserIdentity.useSC_GetAllUsersByTypes();
 
   const handleNewVehicleInfo = (
     key: keyof AddNewVehicle_T,

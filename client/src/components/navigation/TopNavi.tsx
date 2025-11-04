@@ -1,6 +1,6 @@
 "use client";
 
-// Component
+// Components
 import { UserInfo } from "../features/profile/userInfo";
 import { CurrentWalletAddress } from "../features/walletAddress";
 

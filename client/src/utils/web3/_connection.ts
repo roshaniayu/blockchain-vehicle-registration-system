@@ -1,3 +1,5 @@
+"use client";
+
 import Web3 from "web3";
 
 export async function InitWeb3Contract(Artifact: any) {

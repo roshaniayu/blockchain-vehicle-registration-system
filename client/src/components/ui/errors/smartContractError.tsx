@@ -1,6 +1,9 @@
 "use client";
-import { useContractError } from "@/utils/apiHooks/useError";
+
 import React, { useState, useEffect } from "react";
+
+// API hooks
+import { useContractError } from "@/utils/apiHooks/useError";
 
 export function SmartContractError() {
   const { errorContract, setErrorContract } = useContractError();

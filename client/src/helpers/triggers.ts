@@ -1,7 +1,9 @@
 "use client";
 
-import { useLogin } from "@/utils/apiHooks/useAuth";
 import { useCallback, useEffect, useState } from "react";
+
+// API Hooks
+import { useLogin } from "@/utils/apiHooks/useAuth";
 
 export function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,

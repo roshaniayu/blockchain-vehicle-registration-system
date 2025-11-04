@@ -1,17 +1,21 @@
 "use client";
 
+import _, { upperCase } from "lodash";
+import { useEffect, useState } from "react";
+
 // Components
 import { SearchInput } from "@/components/ui/inputs/SearchInput";
+import { OwnerIdToName } from "@/components/features/ownerIdToName";
+
+// API Hooks
 import { useVehicleList } from "@/utils/apiHooks/useVehicle";
-import { useCallback, useEffect, useState } from "react";
 
 // Smart Contracts
 import * as InsuranceRecords from "@/utils/web3/InsuranceRecord";
 import * as VehicleRecord from "@/utils/web3/VehicleRecord";
+
+// Helpers
 import { shortenString } from "@/helpers/converts";
-import _, { upperCase } from "lodash";
-import { OwnerIdToName } from "@/components/features/ownerIdToName";
-import { useLogin } from "@/utils/apiHooks/useAuth";
 
 const tableColumns: {
   title: string;
@@ -33,8 +37,9 @@ const tableColumns: {
 export default function InsuranceListTable() {
   const [keyword, setKeyword] = useState("");
 
-  // APIs
+  // REST Api
   const { data: vehicleList, isLoading } = useVehicleList();
+
   if (isLoading) return <> Loading... </>;
   return (
     <div className=" p-8">
@@ -84,8 +89,8 @@ function RowTemplate(props: { vehicleId: string }) {
   const { vehicleId } = props;
 
   // Smart Contract
-  const sc_GetVehicleInfo = VehicleRecord.use_SC_GetVehicleInfo();
-  const sc_GetInsuranceInfo = InsuranceRecords.use_SC_GetInsuranceInfo();
+  const sc_GetVehicleInfo = VehicleRecord.useSC_GetVehicleInfo();
+  const sc_GetInsuranceInfo = InsuranceRecords.useSC_GetInsuranceInfo();
 
   useEffect(() => {
     sc_GetVehicleInfo.get(vehicleId);

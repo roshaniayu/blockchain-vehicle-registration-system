@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import _, { upperCase } from "lodash";
 
 // Components
 import { ButtonOutline } from "@/components/ui/buttons/buttons";
 import { SearchInput } from "@/components/ui/inputs/SearchInput";
+import { OwnerIdToName } from "@/components/features/ownerIdToName";
 
 // API Hooks
 import { useVehicleList } from "@/utils/apiHooks/useVehicle";
+import { useLogin } from "@/utils/apiHooks/useAuth";
 
 // Web3
 import * as TrafficRecord from "@/utils/web3/TrafficRecord";
@@ -20,11 +23,9 @@ import {
   Ticket_icon,
   Warning_Icon,
 } from "@/components/icons/iconPack";
-import _, { upperCase } from "lodash";
-import { useGetUserByID } from "@/utils/apiHooks/useUsers";
+
+// Types
 import { VehicleInfo_T } from "@/types/vehicles";
-import { OwnerIdToName } from "@/components/features/ownerIdToName";
-import { useLogin } from "@/utils/apiHooks/useAuth";
 
 const tableColumns: {
   title: string;
@@ -43,7 +44,9 @@ const tableColumns: {
 export function TicketListTable() {
   const [keyword, setKeyword] = useState("");
 
+  // API Hooks
   const { data: vehicleList, isLoading } = useVehicleList();
+
   if (isLoading) return <> Loading... </>;
 
   return (
@@ -90,11 +93,10 @@ function RowTemplate(props: { vehicleId: string }) {
   const { vehicleId } = props;
 
   // Smart Contract
-  const sc_GetVehicleInfo = VehicleRecord.use_SC_GetVehicleInfo();
+  const sc_GetVehicleInfo = VehicleRecord.useSC_GetVehicleInfo();
 
-  // Get Vehicle Info
   useEffect(() => {
-    sc_GetVehicleInfo.get(vehicleId);
+    sc_GetVehicleInfo.get(vehicleId); // Get Vehicle Info from smart contracts
   }, [vehicleId]);
 
   if (!sc_GetVehicleInfo.data) return null;
@@ -122,8 +124,8 @@ export function TicketInfo(props: {
   const { data: loginInfo } = useLogin();
 
   // Smart Contracts
-  const sc_GetTicketInfo = TrafficRecord.use_SC_GetTicketInfo();
-  const sc_PayFine = TrafficRecord.use_SC_PayFine();
+  const sc_GetTicketInfo = TrafficRecord.useSC_GetTicketInfo();
+  const sc_PayFine = TrafficRecord.useSC_PayFine();
 
   const handlePayFine = async (violationId: string, amount: number) =>
     sc_PayFine.send(violationId, amount.toString());
@@ -191,18 +193,19 @@ export function TicketInfo(props: {
       </td>
 
       <td className="px-6 py-4">
-        {!sc_GetTicketInfo.data.paid && loginInfo.data.user.userType === "VEHICLE_OWNER" && (
-          <ButtonOutline
-            onClick={() =>
-              handlePayFine(
-                sc_GetTicketInfo?.data?.violationId ?? "",
-                sc_GetTicketInfo?.data?.amount ?? 0
-              )
-            }
-          >
-            Pay Fine
-          </ButtonOutline>
-        )}
+        {!sc_GetTicketInfo.data.paid &&
+          loginInfo.data.user.userType === "VEHICLE_OWNER" && (
+            <ButtonOutline
+              onClick={() =>
+                handlePayFine(
+                  sc_GetTicketInfo?.data?.violationId ?? "",
+                  sc_GetTicketInfo?.data?.amount ?? 0
+                )
+              }
+            >
+              Pay Fine
+            </ButtonOutline>
+          )}
       </td>
     </tr>
   );

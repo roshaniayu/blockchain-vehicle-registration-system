@@ -1,5 +1,12 @@
+"use client";
+
+// Components
 import { Wallet_Icon } from "@/components/icons/iconPack";
+
+// Helpers
 import { shortenString } from "@/helpers/converts";
+
+// Types
 import { UserInfo_T } from "@/types/owner";
 
 export default function SelectedUserInfo(props: { dataset?: UserInfo_T }) {

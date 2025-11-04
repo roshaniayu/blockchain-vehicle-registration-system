@@ -130,7 +130,6 @@ contract InsuranceRecord {
      */
     function settleClaim(string memory _claimId) public payable onlyInsurer {
         Claim storage claim = claims[_claimId];
-        Insurance memory ins = insurances[claim.insuranceId];
         VehicleRecord.Vehicle memory vehicle = vehicleRecordSC.getVehicle(claim.vehicleId);
 
         require(claim.isApproved, "Claim not approved");

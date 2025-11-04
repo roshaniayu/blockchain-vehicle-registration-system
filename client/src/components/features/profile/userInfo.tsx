@@ -1,7 +1,7 @@
 "use client";
 
 // Icons
-import { Icon_User, Logout_icon } from "@/components/icons/iconPack";
+import { Logout_icon } from "@/components/icons/iconPack";
 
 // Custom Hook
 import { useLogin } from "@/utils/apiHooks/useAuth";

@@ -90,9 +90,9 @@ function Card(props: { vehicleId: string }) {
   const { vehicleId } = props;
 
   // Smart Contract
-  const sc_GetVehicleInfo = VehicleRecord.use_SC_GetVehicleInfo();
-  const sc_GetSaleInfo = OwnershipRecord.use_SC_GetSaleInfo();
-  const sc_GetVehicleOwnership = OwnershipRecord.use_SC_GetVehicleOwnership();
+  const sc_GetVehicleInfo = VehicleRecord.useSC_GetVehicleInfo();
+  const sc_GetSaleInfo = OwnershipRecord.useSC_GetSaleInfo();
+  const sc_GetVehicleOwnership = OwnershipRecord.useSC_GetVehicleOwnership();
 
   // Get login Info
   const { data: loginInfo } = useLogin();
@@ -168,9 +168,9 @@ function MintOwnerShip(props: { vehicleInfo: VehicleInfo_T }) {
   const { vehicleInfo } = props;
 
   // Smart Contract functions
-  const sc_GetVehicleOwnership = OwnershipRecord.use_SC_GetVehicleOwnership();
-  const sc_RevokeOwnership = OwnershipRecord.use_SC_RevokeOwnership();
-  const sc_MintVehicleOwnership = OwnershipRecord.use_SC_MintVehicleOwnership();
+  const sc_GetVehicleOwnership = OwnershipRecord.useSC_GetVehicleOwnership();
+  const sc_RevokeOwnership = OwnershipRecord.useSC_RevokeOwnership();
+  const sc_MintVehicleOwnership = OwnershipRecord.useSC_MintVehicleOwnership();
 
   const handleRevokeOwnership = () => {
     sc_RevokeOwnership.send(vehicleInfo.vehicleId);
@@ -236,8 +236,8 @@ function Purchase(props: { vehicleId: string }) {
   const [price, setPrice] = useState(1);
 
   // Smart Contract functions
-  const sc_GetSaleInfo = OwnershipRecord.use_SC_GetSaleInfo();
-  const sc_PurchaseVehicle = OwnershipRecord.use_SC_PurchaseVehicle();
+  const sc_GetSaleInfo = OwnershipRecord.useSC_GetSaleInfo();
+  const sc_PurchaseVehicle = OwnershipRecord.useSC_PurchaseVehicle();
 
   const handlePurchase = () => sc_PurchaseVehicle.send(vehicleId, price);
 
@@ -280,10 +280,10 @@ function ListForSale(props: { vehicleId: string }) {
   const {} = useUpdateSaleStatus(forSale);
 
   // Smart Contract functions
-  const sc_getVehicleOwnership = OwnershipRecord.use_SC_GetVehicleOwnership();
-  const sc_GetSaleInfo = OwnershipRecord.use_SC_GetSaleInfo();
-  const sc_ListVehicleForSale = OwnershipRecord.use_SC_ListVehicleForSale();
-  const sc_CancelSale = OwnershipRecord.use_SC_CancelSale();
+  const sc_getVehicleOwnership = OwnershipRecord.useSC_GetVehicleOwnership();
+  const sc_GetSaleInfo = OwnershipRecord.useSC_GetSaleInfo();
+  const sc_ListVehicleForSale = OwnershipRecord.useSC_ListVehicleForSale();
+  const sc_CancelSale = OwnershipRecord.useSC_CancelSale();
 
   const handleListForSale = async () => {
     sc_ListVehicleForSale.send({
@@ -395,9 +395,9 @@ function TransferOwnership(props: { vehicleId: string }) {
   const {} = useUpdateOwnership(updateOwner);
 
   // Smart Contracts
-  const sc_GetSaleInfo = OwnershipRecord.use_SC_GetSaleInfo();
+  const sc_GetSaleInfo = OwnershipRecord.useSC_GetSaleInfo();
   const sc_TansferOwnershipRecord =
-    OwnershipRecord.use_SC_TansferOwnershipRecord();
+    OwnershipRecord.useSC_TansferOwnershipRecord();
 
   const handleTransferOwnership = () =>
     sc_TansferOwnershipRecord.send(vehicleId, newOwnerWallet);

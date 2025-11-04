@@ -1,8 +1,12 @@
 "use client";
 
-import { fetchPost } from "@/helpers/Apis";
-import { UpdateOwnership_T, UpdateSaleStatus_T } from "@/types/ownership";
 import { useQuery } from "@tanstack/react-query";
+
+// Helpers
+import { fetchPost } from "@/helpers/Apis";
+
+// Types
+import { UpdateOwnership_T, UpdateSaleStatus_T } from "@/types/ownership";
 
 export function useUpdateSaleStatus(params?: UpdateSaleStatus_T) {
   return useQuery({

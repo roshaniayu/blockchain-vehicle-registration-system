@@ -1,13 +1,21 @@
 "use client";
 
-import UserIdentityArtifact from "@/contracts/UserIdentity.json";
-import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
-import { AddUser_T, SC_userInfo_T } from "@/types/owner";
 import { useCallback, useState } from "react";
+
+// Error Handler Context
 import { useContractError } from "@/utils/apiHooks/useError";
+
+// Contracts
+import UserIdentityArtifact from "@/contracts/UserIdentity.json";
+
+// Connections
+import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
+
+// Types
+import { AddUser_T, SC_userInfo_T } from "@/types/owner";
 import { UserType_T } from "@/types/auth";
 
-export function use_SC_AddUser() {
+export function useSC_AddUser() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<string | null>();
@@ -35,7 +43,6 @@ export function use_SC_AddUser() {
             .addVehicleOwner(dataset.Address, dataset.UserName)
             .send({ from: currentAddress })
             .then(() => {
-              console.log(dataset.UserName);
               setData(dataset.UserName);
             });
         case "SPF":
@@ -60,7 +67,7 @@ export function use_SC_AddUser() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_GetAllUsersByTypes() {
+export function useSC_GetAllUsersByTypes() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<SC_userInfo_T[] | null>();
@@ -112,36 +119,4 @@ export function use_SC_GetAllUsersByTypes() {
   }, []);
 
   return { data, error, loading, get };
-}
-
-// export async function VerifyUser(
-//   UserType: "LTA" | "SPF" | "INSURANCE",
-//   Address?: string
-// ) {
-//   const contract = await InitWeb3Contract(UserIdentityArtifact);
-//   if (!contract) return;
-
-//   // Request account access and get the current user's address (Signer equivalent)
-//   const accounts = await (window as any).ethereum.request({
-//     method: "eth_requestAccounts",
-//   });
-//   const userAddress = accounts[0];
-
-//   switch (UserType) {
-//     case "LTA":
-//       return await contract.methods.verifyIsLTA(Address ?? userAddress).call();
-//     case "SPF":
-//       return await contract.methods.verifyIsSPF(Address ?? userAddress).call();
-//     case "INSURANCE":
-//       return await contract.methods
-//         .verifyIsInsurance(Address ?? userAddress)
-//         .call();
-//   }
-// }
-
-export async function GetUserName(Address: string) {
-  const contract = await InitWeb3Contract(UserIdentityArtifact);
-  if (!contract) return;
-
-  return await contract.methods.getUserId(Address).call();
 }

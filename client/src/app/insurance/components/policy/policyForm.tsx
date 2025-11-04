@@ -11,12 +11,14 @@ import SelectedUserInfo from "@/components/features/profile/selectedUserInfo";
 import * as InsuranceRecord from "@/utils/web3/InsuranceRecord";
 import * as VehicleRecord from "@/utils/web3/VehicleRecord";
 
+// API Hooks
+import { useGetUserByID } from "@/utils/apiHooks/useUsers";
+
 // Helpers
 import { generatePolicyId } from "@/helpers/generator";
 
 // Types
 import { PolicyInfo_T } from "@/types/insurance";
-import { useGetUserByID } from "@/utils/apiHooks/useUsers";
 
 export function FormTicket() {
   // React States
@@ -25,12 +27,12 @@ export function FormTicket() {
     insuranceId: generatePolicyId(),
   });
 
-  // APIs
+  // REST Apis
   const { data: userInfo } = useGetUserByID(selectedUser);
 
   // Smart Contracts
-  const sc_GetVehicleInfo = VehicleRecord.use_SC_GetVehicleInfo();
-  const sc_AddInsurance = InsuranceRecord.use_SC_AddInsurance();
+  const sc_GetVehicleInfo = VehicleRecord.useSC_GetVehicleInfo();
+  const sc_AddInsurance = InsuranceRecord.useSC_AddInsurance();
 
   const handlePolicyInfo = (
     key: keyof PolicyInfo_T,

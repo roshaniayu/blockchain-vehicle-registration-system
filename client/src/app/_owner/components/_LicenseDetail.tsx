@@ -2,14 +2,20 @@
 
 import { useEffect } from "react";
 
+// Components
 import { ProfileTable } from "@/components/features/profile/profileTable";
-import { useLicenseInfo, useVehicleOwnerInfo } from "@/utils/apiHooks/useVehicle";
+
+// API Hooks
+import {
+  useLicenseInfo,
+  useVehicleOwnerInfo,
+} from "@/utils/apiHooks/useVehicle";
 
 export default function LicenseInformation(props: { LicneseID: string }) {
   const { LicneseID } = props;
 
+  // REST API
   const { data: vehicleOwnerInfo } = useVehicleOwnerInfo("");
-
   const { data: licenseInfo, refetch: refetchLicenseInfo } =
     useLicenseInfo(LicneseID);
 

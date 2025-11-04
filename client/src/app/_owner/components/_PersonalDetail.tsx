@@ -1,9 +1,7 @@
 "use client";
 
+// Components
 import { ProfileTable } from "@/components/features/profile/profileTable";
-import { useLogin } from "@/utils/apiHooks/useAuth";
-import { useVehicleOwnerInfo } from "@/utils/apiHooks/useVehicle";
-import { useEffect } from "react";
 
 export default function PersonalDetail(props: {
   info: Record<string, string>;
@@ -11,6 +9,7 @@ export default function PersonalDetail(props: {
   const { info } = props;
 
   if (!info) return null;
+
   return (
     <ProfileTable
       mainTitle="Personal Detail"

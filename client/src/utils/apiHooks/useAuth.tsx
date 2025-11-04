@@ -1,6 +1,12 @@
-import { fetchGet, fetchPost } from "@/helpers/Apis";
-import { RegisterInfo_T } from "@/types/auth";
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
+
+// Helpers
+import { fetchGet, fetchPost } from "@/helpers/Apis";
+
+// Types
+import { RegisterInfo_T } from "@/types/auth";
 
 export function useLogin(params?: Record<string, any>) {
   return useQuery({

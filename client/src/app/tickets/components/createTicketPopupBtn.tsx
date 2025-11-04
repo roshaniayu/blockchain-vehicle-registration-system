@@ -3,12 +3,11 @@
 import { useState } from "react";
 
 // Components
-import { Button } from "../../../components/ui/buttons/buttons";
-import { StaticPopup } from "../../../components/ui/popup/staticPopup";
+import { Button } from "@/components/ui/buttons/buttons";
+import { StaticPopup } from "@/components/ui/popup/staticPopup";
 import { FormTicket } from "./formTicket";
 
 export function CreateTicketBtn() {
-  // States
   const [isOpen, setIsOpen] = useState(false);
 
   return (

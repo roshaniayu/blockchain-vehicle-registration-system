@@ -1,6 +1,8 @@
 "use client";
 
+import _ from "lodash";
 import { Fragment, useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 // Hooks
 import { useCheckToken, useLogin } from "@/utils/apiHooks/useAuth";
@@ -9,11 +11,13 @@ import { useCheckToken, useLogin } from "@/utils/apiHooks/useAuth";
 import LoginPage from "@/app/_login/page";
 import { LeftNavi } from "@/components/navigation/LeftNavi";
 import { TopNavi } from "@/components/navigation/TopNavi";
-import { SmartContractErrorProvider } from "./contextProvider";
 import { SmartContractError } from "@/components/ui/errors/smartContractError";
+
+// Providers
+import { SmartContractErrorProvider } from "./contextProvider";
+
+// Helpers
 import { PageNavigtionList } from "@/helpers/constants";
-import _ from "lodash";
-import { useRouter, usePathname } from "next/navigation";
 
 export default function AuthProvider({
   children,
@@ -46,7 +50,6 @@ export default function AuthProvider({
   }, [tokenData]);
 
   useEffect(() => {
-    console.log(pathname, loginUser);
     router.push("/");
     if (!pageValidation(pathname, loginUser)) {
       router.push("/");

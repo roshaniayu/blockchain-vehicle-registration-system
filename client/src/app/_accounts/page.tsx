@@ -1,3 +1,6 @@
+"use client";
+
+// Components
 import { AllUserListTable } from "./components/AllUserListTable";
 
 export default function AccountsPage() {

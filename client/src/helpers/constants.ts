@@ -1,7 +1,14 @@
+"use client";
+
+// Components
 import { HomeIcon, MarketPlace_icon } from "@/components/icons/iconPack";
-import { Claim_Icon } from "@/components/icons/iconPack";
-import { Ticket_icon } from "@/components/icons/iconPack";
-import { List_Icon } from "@/components/icons/iconPack";
+
+// Icons pack
+import {
+  Claim_Icon,
+  Ticket_icon,
+  List_Icon,
+} from "@/components/icons/iconPack";
 
 export const PageNavigtionList = [
   { key: "/", title: "Home", icon: HomeIcon, permission: ["*"] },

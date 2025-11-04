@@ -1,13 +1,21 @@
 "use client";
 
-import TrafficRecordArtifact from "@/contracts/TrafficRecord.json";
-import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
 import Web3 from "web3";
-import { useContractError } from "@/utils/apiHooks/useError";
 import { useCallback, useState } from "react";
+
+// Error Handler Context
+import { useContractError } from "@/utils/apiHooks/useError";
+
+// Contracts
+import TrafficRecordArtifact from "@/contracts/TrafficRecord.json";
+
+// Connections
+import { GetCurrentActiveWallet, InitWeb3Contract } from "./_connection";
+
+// Types
 import { TicketForm_T, TicketInfo_T } from "@/types/tickets";
 
-export function use_SC_RecordViolation() {
+export function useSC_RecordViolation() {
   const { setErrorContract } = useContractError();
   const [data, setData] = useState<string | null>();
   const [loading, setLoading] = useState(false);
@@ -44,7 +52,7 @@ export function use_SC_RecordViolation() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_PayFine() {
+export function useSC_PayFine() {
   const { setErrorContract } = useContractError();
 
   const [data, setData] = useState<string | null>();
@@ -84,7 +92,7 @@ export function use_SC_PayFine() {
   return { data, loading, send: smartContract };
 }
 
-export function use_SC_GetTicketInfo() {
+export function useSC_GetTicketInfo() {
   const [data, setData] = useState<TicketInfo_T | null>();
   const [loading, setLoading] = useState(false);
 

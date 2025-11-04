@@ -1,3 +1,5 @@
+"use client";
+
 export function Icon_User() {
   return (
     <svg

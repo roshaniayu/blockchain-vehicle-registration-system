@@ -1,6 +1,7 @@
 "use client";
 
 import VehiclePage from "../vehicles/page";
+
 // Components
 import { MyInfo } from "./components/MyInfo";
 

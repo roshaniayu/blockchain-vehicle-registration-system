@@ -1,6 +1,12 @@
-import { fetchGet } from "@/helpers/Apis";
-import { UserInfo_T, UserList_T } from "@/types/owner";
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
+
+// Helpers
+import { fetchGet } from "@/helpers/Apis";
+
+// Types
+import { UserInfo_T, UserList_T } from "@/types/owner";
 
 export function useGetAllUsers() {
   return useQuery<{ data: UserList_T[] }, Error>({

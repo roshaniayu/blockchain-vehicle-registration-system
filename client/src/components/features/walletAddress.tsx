@@ -1,5 +1,11 @@
+"use client";
+
 import { useEffect } from "react";
+
+// Icons
 import { MetaMaskIcon } from "../icons/logo";
+
+// Helpers
 import { useCurrentWallet } from "@/helpers/triggers";
 
 export function CurrentWalletAddress(props: {
