@@ -15,7 +15,7 @@ export const PageNavigtionList = [
     key: "/tickets",
     title: "Traffic Tickets",
     icon: Ticket_icon,
-    permission: ["VEHICLE_OWNER", "SPF"],
+    permission: ["VEHICLE_OWNER"],
   },
   {
     key: "/marketplace",
