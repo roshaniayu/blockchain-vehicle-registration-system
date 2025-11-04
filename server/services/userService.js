@@ -10,7 +10,7 @@ module.exports = {
      */
     getAllUsers: async (db) => {
         const all = util.promisify(db.all).bind(db);
-        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType FROM Users ORDER BY Username';
+        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType, Activate, WalletAddress FROM Users ORDER BY CreatedDate DESC';
         return all(sql); 
     },
 
@@ -23,7 +23,7 @@ module.exports = {
      */
     getUserById: async (db, id) => {
         const get = util.promisify(db.get).bind(db);
-        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType FROM Users WHERE ID = ?';
+        const sql = 'SELECT ID, OwnerID, Username, CreatedDate, UserType, Activate, WalletAddress FROM Users WHERE ID = ?';
         return get(sql, [id]);
     },
 
@@ -34,15 +34,15 @@ module.exports = {
      * @returns {Promise<object>} A promise that resolves with the created user's data.
      */
     createUser: async (db, userData) => {
-        const { ID, OwnerID, Username, Password, Salt, CreatedDate, UserType } = userData;
+        const { ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType } = userData;
         
         const sql = `
-            INSERT INTO Users (ID, OwnerID, Username, Password, Salt, CreatedDate, UserType) 
+            INSERT INTO Users (ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType) 
             VALUES (?, ?, ?, ?, ?, ?, ?);
         `;
         
         return new Promise((resolve, reject) => {
-            db.run(sql, [ID, OwnerID, Username, Password, Salt, CreatedDate, UserType], function (err) {
+            db.run(sql, [ID, OwnerID, Username, Password, WalletAddress, CreatedDate, UserType], function (err) {
                 if (err) {
                     return reject(err);
                 }
@@ -72,6 +72,29 @@ module.exports = {
                     return reject(new Error(`User with ID ${id} not found or no changes were made.`));
                 }
                 resolve({ ID: id, changes: this.changes, updates });
+            });
+        });
+    },
+
+    /**
+     * Updates an existing user's details.
+     * @param {object} db - The SQLite database connection object.
+     * @param {string} id - The UUID of the user to update.
+     * @param {object} updates - Object containing fields to update (Username, UserType).
+     * @returns {Promise<object>} A promise that resolves with the number of affected rows.
+     */
+    accActivate: async (db, id) => {
+        const sql = 'UPDATE Users SET Activate = true WHERE ID = $1 OR OwnerID = $1';
+        
+        return new Promise((resolve, reject) => {
+            db.run(sql, [id], function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                if (this.changes === 0) {
+                    return reject(new Error(`User with ID ${id} not found or no changes were made.`));
+                }
+                resolve({ ID: id, changes: this.changes });
             });
         });
     },

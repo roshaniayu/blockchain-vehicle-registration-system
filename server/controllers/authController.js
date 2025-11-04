@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const ownerService = require('../services/vehicleOwnerService');
 const { successResponse, errorResponse } = require('../contracts/responseFormat');
 const { generateToken } = require('../utility/authUtils');
 const { randomUUID } = require('crypto');
@@ -32,6 +33,11 @@ module.exports = {
                 return errorResponse(res, 'Invalid username or password.', 401, null);
             }
 
+            if (!user.Activate) {
+                logger.auth('LOGIN', username, 'FAILED - Account is not activated yet.');
+                return errorResponse(res, 'Your account is not activated yet. Please wait for the "Land Transport Authority" officer to activate your account.', 400, null);
+            }
+
             // Generate JWT token
             const token = generateToken(user);
 
@@ -58,7 +64,7 @@ module.exports = {
      * @param {object} res - Express response
      */
     register: async (req, res) => {
-        const { username, password, ownerID, userType } = req.body;
+        const { username, password, walletAddress, userType, LicenseID, Name, DOB, Nationality, PhoneNumber, Address } = req.body;
 
         // Validation
         if (!username || !password) {
@@ -70,7 +76,7 @@ module.exports = {
             logger.auth('REGISTER', username, 'FAILED - Password too short');
             return errorResponse(res, 'Password must be at least 6 characters long.', 400, null);
         }
-
+        
         try {
             // Check if username already exists
             const usernameAlreadyExists = await authService.usernameExists(req.db, username);
@@ -81,15 +87,37 @@ module.exports = {
 
             // Hash password
             const hashedPassword = await authService.hashPassword(password);
+            let owner;
+            
+            // Create owner
+            if(userType === "VEHICLE_OWNER"){
+                if (!LicenseID || !Name || !DOB || !Nationality || !PhoneNumber || !Address) {
+                    logger.warn('Create owner failed - missing required fields');
+                    return errorResponse(res, 'Missing one or more required fields.', 400);
+                }
+           
+            const ownerData = {
+                OwnerID: randomUUID(),
+                LicenseID,
+                Name,
+                DOB,
+                Nationality,
+                PhoneNumber,
+                Address
+            };
+             owner = await ownerService.createOwner(req.db, ownerData);
+             logger.database('INSERT', 'VehicleOwner', `SUCCESS - Created owner ${owner.OwnerID}`, { Name, LicenseID });
+            }
 
             // Register user
             const userData = {
                 ID: randomUUID(),
-                OwnerID: ownerID || null,
+                OwnerID: owner?.OwnerID || null,
                 Username: username,
                 Password: hashedPassword,
+                WalletAddress: walletAddress || "",
                 CreatedDate: new Date().toISOString(),
-                UserType: userType || 'VehicleOwner'
+                UserType: userType || 'VEHICLE_OWNER'
             };
 
             const newUser = await authService.registerUser(req.db, userData);
@@ -116,6 +144,62 @@ module.exports = {
         } catch (err) {
             logger.error('Logout error', err.message);
             return errorResponse(res, 'Failed to logout.', 500, err.message);
+        }
+    },
+
+    /**
+     * Verify token validity and return user info
+     * POST /auth/verify-token
+     * @param {object} req - Express request
+     * @param {object} res - Express response
+     */
+    verifyToken: async (req, res) => {
+        try {
+            const authHeader = req.headers.authorization;
+
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                logger.auth('VERIFY_TOKEN', 'unknown', 'FAILED - Missing authorization header');
+                return errorResponse(res, 'Missing or invalid authorization header.', 401, 'Authorization header must be in format: Bearer <token>');
+            }
+
+            const token = authHeader.slice(7);
+            const { verifyToken } = require('../utility/authUtils');
+            const decoded = verifyToken(token);
+
+            if (!decoded) {
+                logger.auth('VERIFY_TOKEN', 'unknown', 'FAILED - Invalid token');
+                return errorResponse(res, 'Invalid or expired token.', 401, 'Token is not valid');
+            }
+
+            // Fetch full user data from database
+            const user = await authService.getUserById(req.db, decoded.id);
+
+            if (!user) {
+                logger.auth('VERIFY_TOKEN', decoded.username || 'unknown', 'FAILED - User not found');
+                return errorResponse(res, 'User not found.', 401, 'The user associated with this token no longer exists');
+            }
+
+            // Check if account is active
+            if (!user.Activate) {
+                logger.auth('VERIFY_TOKEN', user.Username, 'FAILED - Account deactivated');
+                return errorResponse(res, 'Account deactivated.', 403, 'Your account has been deactivated');
+            }
+
+            logger.auth('VERIFY_TOKEN', user.Username, 'SUCCESS', { userId: user.ID, userType: user.UserType });
+            return successResponse(res, 'Token is valid.', 200, {
+                user: {
+                    id: user.ID,
+                    ownerId: user.OwnerID,
+                    username: user.Username,
+                    userType: user.UserType,
+                    walletAddress: user.WalletAddress,
+                    createdDate: user.CreatedDate,
+                    activate: user.Activate
+                }
+            });
+        } catch (err) {
+            logger.error('Token verification error', err.message);
+            return errorResponse(res, 'Authentication error.', 401, err.message);
         }
     }
 };
