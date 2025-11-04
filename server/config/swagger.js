@@ -14,7 +14,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
+        url: 'http://localhost:9000',
         description: 'Local development server',
       },
       {
@@ -57,8 +57,17 @@ const options = {
             },
             UserType: {
               type: 'string',
-              enum: ['VehicleOwner', 'Admin', 'Inspector'],
+              enum: ['VehicleOwner', 'Admin', 'Inspector', 'LTA', 'Owner', 'Insurance'],
               description: 'Type of user',
+            },
+            WalletAddress: {
+              type: 'string',
+              nullable: true,
+              description: 'Blockchain wallet address',
+            },
+            Activate: {
+              type: 'boolean',
+              description: 'Account activation status',
             },
           },
         },
@@ -94,8 +103,13 @@ const options = {
             },
             userType: {
               type: 'string',
-              enum: ['VehicleOwner', 'Admin', 'Inspector'],
+              enum: ['VehicleOwner', 'Admin', 'Inspector', 'LTA', 'Owner', 'Insurance'],
               description: 'Type of user being registered',
+            },
+            walletAddress: {
+              type: 'string',
+              nullable: true,
+              description: 'Blockchain wallet address (optional)',
             },
           },
         },
@@ -123,6 +137,17 @@ const options = {
                   type: 'string',
                   format: 'uuid',
                   nullable: true,
+                },
+                walletAddress: {
+                  type: 'string',
+                  nullable: true,
+                },
+                createdDate: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+                activate: {
+                  type: 'boolean',
                 },
               },
             },
@@ -186,6 +211,64 @@ const options = {
               type: 'string',
               format: 'date',
               description: 'Date license expires (YYYY-MM-DD)',
+            },
+          },
+        },
+        Vehicle: {
+          type: 'object',
+          properties: {
+            VehicleID: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Unique vehicle identifier',
+            },
+            OwnerID: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              description: 'Reference to VehicleOwner',
+            },
+            ForSale: {
+              type: 'boolean',
+              description: 'Indicates if the vehicle is currently for sale',
+            },
+          },
+        },
+        NewVehicle: {
+          type: 'object',
+          required: ['vehicleID'],
+          properties: {
+            vehicleID: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Unique identifier for the new vehicle',
+            },
+            ownerID: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              description: 'Optional: ID of the initial owner',
+            },
+          },
+        },
+        UpdateVehicleOwner: {
+          type: 'object',
+          required: ['newOwnerID'],
+          properties: {
+            newOwnerID: {
+              type: 'string',
+              format: 'uuid',
+              description: 'The ID of the new owner for the vehicle',
+            },
+          },
+        },
+        UpdateVehicleForSaleStatus: {
+          type: 'object',
+          required: ['forSale'],
+          properties: {
+            forSale: {
+              type: 'boolean',
+              description: 'Boolean indicating if the vehicle is for sale (true) or not (false)',
             },
           },
         },

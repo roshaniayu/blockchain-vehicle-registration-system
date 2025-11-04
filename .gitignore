@@ -129,7 +129,10 @@ modules.xml
 # End of https://www.gitignore.io/api/webstorm+iml
 
 package-lock.json
-server/server.log
 
 ### Blockchain Folder ###
 /blockchain/build/contracts/*
+
+### Server Folder ###
+/server/server.log
+/server/database/mydb.db

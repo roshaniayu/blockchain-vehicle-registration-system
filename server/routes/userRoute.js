@@ -172,5 +172,55 @@ module.exports = (db) => {
      */
     router.post('/', authenticate, userController.createUser);
 
+    
+    /**
+     * @swagger
+     * /api/users/activate/{id}:
+     *   get:
+     *     tags:
+     *       - Users
+     *     summary: Get user by ID
+     *     description: Retrieve a specific user by their ID. Requires authentication token.
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         description: User ID (UUID)
+     *         schema:
+     *           type: string
+     *           format: uuid
+     *     responses:
+     *       200:
+     *         description: User retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: "success"
+     *                 message:
+     *                   type: string
+     *                   example: "User retrieved successfully."
+     *                 data:
+     *                   $ref: '#/components/schemas/User'
+     *       401:
+     *         description: Unauthorized - missing or invalid token
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     *       404:
+     *         description: User not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
+    router.get('/activate/:id', authenticate, userController.accActivate);
+
     return router;
 };

@@ -46,6 +46,32 @@ module.exports = {
     },
 
     /**
+     * Handles POST /users: Account activation.
+     * Note: Use /auth/activate for account activation.
+     */
+    accActivate: async (req, res) => {
+          const { id } = req.params;
+
+        // Controller performs validation checks
+        if (!id) {
+            logger.warn('Account activation failed - missing required fields');
+            return errorResponse(res, 'Missing required fields: ID.', 400, null);
+        }
+
+        try {
+            const user = await userService.accActivate(req.db, id);
+            
+            logger.database('UPDATE', 'Activated', `SUCCESS - Activated user ${user.ID}`, { id });
+            return successResponse(res, 'User activation successfully.', 201, id);
+        } catch (err) {
+            // Check if error is due to database constraints (e.g., unique email)
+            const statusCode = err.message.includes('SQLITE_CONSTRAINT') ? 400 : 500;
+            logger.error('Failed to activate account', err.message);
+            return errorResponse(res, 'Failed to activate account.', statusCode, err.message);
+        }
+    },
+
+    /**
      * Handles POST /users: Creates a new user.
      * Note: Use /auth/register for user registration with password hashing
      */
