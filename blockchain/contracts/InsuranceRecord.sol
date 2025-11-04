@@ -1,93 +1,166 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-import "./UserIdentity.sol";
 import "./VehicleRecord.sol";
+import "./UserIdentity.sol";
 
 contract InsuranceRecord {
     UserIdentity public userIdentitySC;
     VehicleRecord public vehicleRecordSC;
 
-    struct InsuranceClaim {
-        string insuranceRecordId; // PK
-        string accidentId;        // FK
-        uint256 createdDate;
-        bool status;              // Active/Inactive claim
-        string insuranceId;       // Policy number or ID
-        bool approveClaim;
-        string proofOfAccident;   // Image URL 
+    struct Insurance {
+        string insuranceId;
+        string vehicleId;
+        string insurerId;
+        address payable insurerAddress;
+        string policyType;
+        uint256 premiumAmount;
+        uint256 coverageLimit; // Maximum payable coverage
+        uint256 policyStartDate;
+        uint256 policyExpiryDate;
+        bool isActive;
     }
 
-    mapping(string => InsuranceClaim) public insuranceClaims;
-    mapping(string => string[]) public claimsByAccidentId;
-    mapping(string => string[]) public claimsByInsuranceId;
+    struct Claim {
+        string claimId;
+        string insuranceId;
+        string vehicleId;
+        string ownerId;
+        string reason;
+        uint256 claimedAmount;
+        uint256 approvedAmount;
+        bool isApproved;
+        bool isSettled;
+    }
 
-    event InsuranceClaimCreated(string indexed insuranceRecordId, string accidentId);
-    event InsuranceClaimApproved(string indexed insuranceRecordId, address approver);
-    event InsurancePolicyUpdated(string indexed vehicleId, string insuranceId);
+    mapping(string => Insurance) public insurances;
+    mapping(string => Claim) public claims;
 
-    modifier onlyInsurance() {
-        require(userIdentitySC.verifyIsInsurance(msg.sender), "Caller is not Insurance");
+    modifier onlyInsurer() {
+        require(userIdentitySC.verifyIsInsurance(msg.sender), "Caller is not an insurer");
         _;
     }
 
-    constructor(address _userIdentityAddress, address _vehicleRecordAddress) {
-        userIdentitySC = UserIdentity(_userIdentityAddress);
-        vehicleRecordSC = VehicleRecord(_vehicleRecordAddress);
+    constructor(address _userIdentityAddr, address _vehicleRecordAddr) {
+        userIdentitySC = UserIdentity(_userIdentityAddr);
+        vehicleRecordSC = VehicleRecord(_vehicleRecordAddr);
     }
 
-    /// @notice Create a new insurance claim linked to an accident
-    function createInsuranceClaim(
-        string memory _insuranceRecordId,
-        string memory _accidentId,
+    /**
+     * @dev Register a new insurance policy
+     */
+    function addInsurance(
         string memory _insuranceId,
-        string memory _proofOfAccident
-    ) public onlyInsurance {
-        require(bytes(insuranceClaims[_insuranceRecordId].insuranceRecordId).length == 0, "Claim already exists");
+        string memory _vehicleId,
+        string memory _insurerId,
+        address payable _insurerAddress,
+        string memory _policyType,
+        uint256 _premiumAmount,
+        uint256 _coverageLimit,
+        uint256 _startDate,
+        uint256 _expiryDate
+    ) public onlyInsurer {
+        require(bytes(insurances[_insuranceId].insuranceId).length == 0, "Insurance ID exists");
+        require(_expiryDate > _startDate, "Invalid policy dates");
 
-        InsuranceClaim memory newClaim = InsuranceClaim({
-            insuranceRecordId: _insuranceRecordId,
-            accidentId: _accidentId,
-            createdDate: block.timestamp,
-            status: true,
+        insurances[_insuranceId] = Insurance({
             insuranceId: _insuranceId,
-            approveClaim: false,
-            proofOfAccident: _proofOfAccident
+            vehicleId: _vehicleId,
+            insurerId: _insurerId,
+            insurerAddress: _insurerAddress,
+            policyType: _policyType,
+            premiumAmount: _premiumAmount,
+            coverageLimit: _coverageLimit,
+            policyStartDate: _startDate,
+            policyExpiryDate: _expiryDate,
+            isActive: true
         });
 
-        insuranceClaims[_insuranceRecordId] = newClaim;
-        claimsByAccidentId[_accidentId].push(_insuranceRecordId);
-        claimsByInsuranceId[_insuranceId].push(_insuranceRecordId);
-
-        emit InsuranceClaimCreated(_insuranceRecordId, _accidentId);
+        vehicleRecordSC.updateInsurance(_vehicleId, _insuranceId);
     }
 
-    /// @notice Approve a claim and update vehicle insurance linkage
-    function approveInsuranceClaim(string memory _insuranceRecordId, string memory _vehicleId)
-        public
-        onlyInsurance
-    {
-        InsuranceClaim storage claim = insuranceClaims[_insuranceRecordId];
-        require(!claim.approveClaim, "Claim already approved");
-        claim.approveClaim = true;
+    /**
+     * @dev Vehicle owner submits a claim request.
+     */
+    function requestClaim(
+        string memory _claimId,
+        string memory _insuranceId,
+        string memory _vehicleId,
+        string memory _reason,
+        string memory _ownerId,
+        uint256 _claimedAmount
+    ) public {
+        require(bytes(insurances[_insuranceId].insuranceId).length != 0, "Insurance not found");
+        require(claims[_claimId].claimedAmount == 0, "Claim already exists");
 
-        // Update the vehicle's insuranceId in VehicleRecord
-        try vehicleRecordSC.modifyInsuranceId(_vehicleId, claim.insuranceId) {
-            emit InsurancePolicyUpdated(_vehicleId, claim.insuranceId);
-        } catch {
-            // ignore if VehicleRecord restricts modification to LTA
-        }
-
-        emit InsuranceClaimApproved(_insuranceRecordId, msg.sender);
+        claims[_claimId] = Claim({
+            claimId: _claimId,
+            insuranceId: _insuranceId,
+            vehicleId: _vehicleId,
+            ownerId: _ownerId,
+            reason: _reason,
+            claimedAmount: _claimedAmount,
+            approvedAmount: 0,
+            isApproved: false,
+            isSettled: false
+        });
+        vehicleRecordSC.linkClaim(_vehicleId, _claimId);
     }
 
-    /// @notice Fetch all claims for a given accident
-    function getClaimsByAccidentId(string memory _accidentId) public view returns (string[] memory) {
-        return claimsByAccidentId[_accidentId];
+    /**
+     * @dev Insurer approves or partially approves a claim based on eligibility.
+     */
+    function approveClaim(
+        string memory _claimId,
+        uint256 _approvedAmount
+    ) public onlyInsurer {
+        Claim storage claim = claims[_claimId];
+        Insurance memory ins = insurances[claim.insuranceId];
+
+        require(!claim.isApproved, "Already approved");
+        require(_approvedAmount <= ins.coverageLimit, "Above coverage limit");
+        require(_approvedAmount <= claim.claimedAmount, "Cannot approve more than claimed");
+
+        claim.approvedAmount = _approvedAmount;
+        claim.isApproved = true;
     }
 
-    /// @notice Fetch all claims for a given insurance policy
-    function getClaimsByInsuranceId(string memory _insuranceId) public view returns (string[] memory) {
-        return claimsByInsuranceId[_insuranceId];
+    /**
+     * @dev Settle the claim — insurer pays the approved amount to vehicle owner.
+     */
+    function settleClaim(string memory _claimId) public payable onlyInsurer {
+        Claim storage claim = claims[_claimId];
+        Insurance memory ins = insurances[claim.insuranceId];
+        VehicleRecord.Vehicle memory vehicle = vehicleRecordSC.getVehicle(claim.vehicleId);
+
+        require(claim.isApproved, "Claim not approved");
+        require(!claim.isSettled, "Already settled");
+        require(msg.value >= claim.approvedAmount, "Insufficient payment");
+
+        // Pay approved claim amount to the vehicle owner
+        vehicle.currentOwnerAddress.transfer(claim.approvedAmount);
+
+        claim.isSettled = true;
+        vehicleRecordSC.updateClaimSettlement(claim.vehicleId, claim.approvedAmount);
+    }
+
+    /**
+     * @dev Verify if policy is still active
+     */
+    function isPolicyActive(string memory _insuranceId) public view returns (bool) {
+        Insurance memory ins = insurances[_insuranceId];
+        return (block.timestamp >= ins.policyStartDate &&
+                block.timestamp <= ins.policyExpiryDate &&
+                ins.isActive);
+    }
+
+    function getInsuranceInfo(string memory _insuranceId) public view returns (Insurance memory) {
+        require(bytes(insurances[_insuranceId].insuranceId).length != 0, "Insurance Policy not found");
+        return insurances[_insuranceId];
+    }
+
+    function getClaimInfo(string memory _claimId) public view returns (Claim memory) {
+        require(bytes(claims[_claimId].claimId).length != 0, "Claim not found");
+        return claims[_claimId];
     }
 }

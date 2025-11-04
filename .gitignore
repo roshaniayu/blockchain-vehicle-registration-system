@@ -130,3 +130,6 @@ modules.xml
 
 package-lock.json
 server/server.log
+
+### Blockchain Folder ###
+/blockchain/build/contracts/*

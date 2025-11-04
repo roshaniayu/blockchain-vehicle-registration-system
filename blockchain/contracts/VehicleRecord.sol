@@ -7,100 +7,150 @@ contract VehicleRecord {
     UserIdentity public userIdentitySC;
 
     struct Vehicle {
-        string vehicleId; // PK
-        string[] accidentIds; // FK
-        string insuranceId; // FK
-        uint256 coeDate;
-        uint256 manufactureDate;
-        string manufactureCompany;
-        uint256 modelNo;
-        bool vehicleSignature; // LTA's signature
+        string vehicleId;                   // Unique vehicle identifier
+        string currentOwnerId;              // Owner ID reference
+        address payable currentOwnerAddress;// Owner wallet address
+        string insuranceId;                 // Linked insurance record
+        uint256 coeStartDate;               // COE start date (timestamp)
+        uint256 coeExpiryDate;              // COE expiry date (timestamp)
+        uint256 manufactureDate;            // Manufacturing year/date
+        string manufactureCompany;          // Company name
+        string modelNo;                    // Model number
+        bool vehicleSignature;              // LTA verification flag
+        string[] accidentIds;             // Linked traffic/accident IDs
+        string[] claimIds;                // 🔹 new
+        uint256 totalFinesPaid;           // 🔹 new
+        uint256 totalClaimsReceived; 
     }
 
-    // --- State Variables ---
-    mapping(string => Vehicle) public vehicles;
+    mapping(string => Vehicle) public vehicles; // vehicleId → Vehicle mapping
 
-    // --- Modifiers ---
-    // Modifier to restrict functions to LTA members
     modifier onlyLTA() {
         require(userIdentitySC.verifyIsLTA(msg.sender), "Caller is not LTA");
         _;
     }
 
-    // --- Constructor ---
     constructor(address _userIdentityAddress) {
         userIdentitySC = UserIdentity(_userIdentityAddress);
     }
 
     /**
-     * @dev Adds a new vehicle. Only callable by LTA.
+     * @dev Register a new vehicle by the LTA.
      */
-    function addVehicle(Vehicle memory _vehicle) public onlyLTA {
-        require(
-            bytes(vehicles[_vehicle.vehicleId].vehicleId).length == 0,
-            "Vehicle already exists"
-        );
-        vehicles[_vehicle.vehicleId] = _vehicle;
+    function addVehicle(
+        string memory _vehicleId,
+        string memory _ownerId,
+        address payable _ownerAddress,
+        uint256 _coeStartDate,
+        uint256 _coeExpiryDate,
+        uint256 _manufactureDate,
+        string memory _company,
+        string memory _modelNo
+    ) public onlyLTA {
+        require(bytes(vehicles[_vehicleId].vehicleId).length == 0, "Vehicle already exists");
+        require(_coeExpiryDate > _coeStartDate, "Invalid COE duration");
+
+        vehicles[_vehicleId] = Vehicle({
+            vehicleId: _vehicleId,
+            currentOwnerId: _ownerId,
+            currentOwnerAddress: _ownerAddress,
+            insuranceId: "",
+            coeStartDate: _coeStartDate,
+            coeExpiryDate: _coeExpiryDate,
+            manufactureDate: _manufactureDate,
+            manufactureCompany: _company,
+            modelNo: _modelNo,
+            vehicleSignature: true,
+            accidentIds: new string[](0) ,
+            claimIds: new string[](0) ,
+            totalFinesPaid: 0,
+            totalClaimsReceived: 0
+        });
     }
 
     /**
-     * @dev Gets all details for a specific vehicle.
+     * @dev Transfer ownership (used by OwnershipRecord contract).
      */
-    function getVehicleDetail(string memory _vehicleId) public view returns (Vehicle memory) {
-        return vehicles[_vehicleId];
+    function updateOwner(
+        string memory _vehicleId,
+        string memory _newOwnerId,
+        address payable _newOwnerAddr
+    ) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        vehicles[_vehicleId].currentOwnerId = _newOwnerId;
+        vehicles[_vehicleId].currentOwnerAddress = _newOwnerAddr;
+    }
+
+    function updateFinePayment(string memory _vehicleId, uint256 _amount) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        vehicles[_vehicleId].totalFinesPaid += _amount;
+    }
+
+    // called by InsuranceRecord when a claim is settled
+    function updateClaimSettlement(
+        string memory _vehicleId,
+        uint256 _amount
+    ) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        vehicles[_vehicleId].totalClaimsReceived += _amount;
     }
 
     /**
-     * @dev Gets the COE status (expiry date) for a specific vehicle.
+     * @dev Link accident or violation record.
      */
-    function getCOEStatus(string memory _vehicleId) public view returns (uint256) {
-        return vehicles[_vehicleId].coeDate;
+    function linkAccident(string memory _vehicleId, string memory _accidentId) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        vehicles[_vehicleId].accidentIds.push(_accidentId);
     }
 
     /**
-     * @dev Modifies the COE expiry date. Only callable by LTA.
+     * @dev Link claim record.
      */
-    function modifyCOEDate(string memory _vehicleId, uint256 _date) public onlyLTA {
-        vehicles[_vehicleId].coeDate = _date;
+    function linkClaim(string memory _vehicleId, string memory _claimId) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        vehicles[_vehicleId].claimIds.push(_claimId);
     }
 
+
     /**
-     * @dev ModGifies the insurance policy number. Only callable by LTA.
+     * @dev Link insurance record with vehicle.
      */
-    function modifyInsuranceId(string memory _vehicleId, string memory _insuranceId) public onlyLTA {
+    function updateInsurance(string memory _vehicleId, string memory _insuranceId) external {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
         vehicles[_vehicleId].insuranceId = _insuranceId;
     }
 
     /**
-     * @dev LTA officially signs off on a vehicle's details. Only callable by LTA.
+     * @dev Verify if COE is still valid.
      */
-    function signVehicleByLTA(string memory _vehicleId) public onlyLTA {
-        vehicles[_vehicleId].vehicleSignature = true;
+    function isCOEActive(string memory _vehicleId) public view returns (bool) {
+        Vehicle memory v = vehicles[_vehicleId];
+        return (block.timestamp >= v.coeStartDate && block.timestamp <= v.coeExpiryDate);
     }
 
     /**
-     * @dev Verifies if a vehicle has been signed by the LTA.
+     * @dev Fetch vehicle info by ID.
      */
-    function verifyVehicle(string memory _vehicleId) public view returns (bool) {
-        return vehicles[_vehicleId].vehicleSignature;
+    function getTotalFinesPaid(string memory _vehicleId) public view returns (uint256) {
+        return vehicles[_vehicleId].totalFinesPaid;
     }
 
-    /**
-     * @dev Links a new accident record. Only callable by LTA.
-     */
-    function linkAccidentRecord(string memory _vehicleId, string memory _accidentId) public onlyLTA {
-    Vehicle storage vehicle = vehicles[_vehicleId];
-
-    // Ensure vehicle exists
-    require(bytes(vehicle.vehicleId).length != 0, "Vehicle not found");
-
-    // Check duplicates
-    for (uint256 i = 0; i < vehicle.accidentIds.length; i++) {
-        if (keccak256(bytes(vehicle.accidentIds[i])) == keccak256(bytes(_accidentId))) {
-            revert("Accident ID already linked");
-        }
+    function getTotalClaimsReceived(string memory _vehicleId) public view returns (uint256) {
+        return vehicles[_vehicleId].totalClaimsReceived;
     }
 
-    vehicle.accidentIds.push(_accidentId);
-}
+    function getClaimIds(string memory _vehicleId) public view returns (string[] memory) {
+        return vehicles[_vehicleId].claimIds;
+    }
+
+    function getVehicle(string memory _vehicleId) public view returns (Vehicle memory) {
+        require(bytes(vehicles[_vehicleId].vehicleId).length != 0, "Vehicle not found");
+        return vehicles[_vehicleId];
+    }
+
+    function isVehicleExist(string memory vehicleId) public view returns (bool) {
+    // Check if the vehicle record exists by verifying non-empty fields or registration status
+    return bytes(vehicles[vehicleId].vehicleId).length > 0;
+    }
+
 }
