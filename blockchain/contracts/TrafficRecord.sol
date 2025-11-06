@@ -1,99 +1,67 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
 import "./UserIdentity.sol";
 import "./VehicleRecord.sol";
 
-/// @title TrafficRecords - stores accident/traffic records on-chain
-/// @dev Roles: DEFAULT_ADMIN_ROLE (deployer), LTA_ROLE, SPF_ROLE
 contract TrafficRecord {
     UserIdentity public userIdentitySC;
-    VehicleRecord public vehicleRecordSC;
+    VehicleRecord public vehicleRecord;
 
-    struct Traffic {
-        string accidentId;
-        string ownerId;
+    address payable public ltaWallet;
+
+    struct Violation {
+        string violationId;
         string vehicleId;
-        string accidentType;
-        uint256 accidentDate;
         string reason;
         uint256 amount;
-        bool trafficSignature;
+        bool paid;
     }
 
-    mapping(string => Traffic) public trafficRecords;
-    mapping(string => string[]) public trafficByOwner;
-    mapping(string => string[]) public trafficByVehicle;
+    mapping(string => Violation) public violations;
 
-    event TrafficRecordAdded(string indexed accidentId, string vehicleId, string ownerId);
-    event TrafficSigned(string indexed accidentId, address signer);
+    event ViolationAdded(string indexed violationId, string vehicleId, uint256 amount);
+    event FinePaid(string indexed violationId, address payer, uint256 amount);
 
     modifier onlySPF() {
-        require(userIdentitySC.verifyIsSPF(msg.sender), "Caller is not SPF");
+        require(userIdentitySC.verifyIsSPF(msg.sender), "Not SPF");
         _;
     }
 
-    constructor(address _userIdentityAddress, address _vehicleRecordAddress) {
-        userIdentitySC = UserIdentity(_userIdentityAddress);
-        vehicleRecordSC = VehicleRecord(_vehicleRecordAddress);
+    constructor(address _userIdentity, address _vehicleRecord, address payable _ltaWallet) {
+        userIdentitySC = UserIdentity(_userIdentity);
+        vehicleRecord = VehicleRecord(_vehicleRecord);
+        ltaWallet = _ltaWallet;
     }
 
-    /// @notice Checks if address is SPF
-    function isSPF(address addr) public view returns (bool) {
-        return userIdentitySC.verifyIsSPF(addr);
-    }
-
-    /// @notice Adds a new traffic/accident record (SPF only)
-    function addTrafficRecord(
-        string memory _accidentId,
-        string memory _ownerId,
+    function recordViolation(
+        string memory _violationId,
         string memory _vehicleId,
-        string memory _accidentType,
-        uint256 _accidentDate,
         string memory _reason,
         uint256 _amount
     ) public onlySPF {
-        require(bytes(trafficRecords[_accidentId].accidentId).length == 0, "Record already exists");
-
-        Traffic memory record = Traffic({
-            accidentId: _accidentId,
-            ownerId: _ownerId,
-            vehicleId: _vehicleId,
-            accidentType: _accidentType,
-            accidentDate: _accidentDate,
-            reason: _reason,
-            amount: _amount,
-            trafficSignature: false
-        });
-
-        trafficRecords[_accidentId] = record;
-        trafficByOwner[_ownerId].push(_accidentId);
-        trafficByVehicle[_vehicleId].push(_accidentId);
-
-        // Link accident to vehicle in VehicleRecord
-        // Only LTA can call this, so we add a try/catch in case the LTA restriction reverts
-        try vehicleRecordSC.linkAccidentRecord(_vehicleId, _accidentId) {
-            // Successfully linked
-        } catch {
-            // If LTA-only restriction fails, just skip linking (to avoid revert)
-        }
-
-        emit TrafficRecordAdded(_accidentId, _vehicleId, _ownerId);
+        require(bytes(violations[_violationId].violationId).length == 0, "Exists");
+        violations[_violationId] = Violation(_violationId, _vehicleId, _reason, _amount, false);
+        vehicleRecord.linkAccident(_vehicleId, _violationId);
+        emit ViolationAdded(_violationId, _vehicleId, _amount);
     }
 
-    /// @notice SPF digitally signs an accident record
-    function signBySPF(string memory _accidentId) public onlySPF {
-        trafficRecords[_accidentId].trafficSignature = true;
-        emit TrafficSigned(_accidentId, msg.sender);
+    function payFine(string memory _violationId) public payable {
+        Violation storage v = violations[_violationId];
+        VehicleRecord.Vehicle memory veh = vehicleRecord.getVehicle(v.vehicleId);
+
+        require(msg.sender == veh.currentOwnerAddress, "Not owner");
+        require(msg.value == v.amount, "Incorrect fine");
+        require(!v.paid, "Already paid");
+
+        (bool sent, ) = ltaWallet.call{value: msg.value}("");
+        require(sent, "Payment failed");
+        v.paid = true;
+        vehicleRecord.updateFinePayment(v.vehicleId, v.amount);
+        emit FinePaid(_violationId, msg.sender, msg.value);
     }
 
-    /// @notice Get all accidents for an owner
-    function getTrafficRecordsByOwner(string memory _ownerId) public view returns (string[] memory) {
-        return trafficByOwner[_ownerId];
-    }
-
-    /// @notice Get all accidents for a vehicle
-    function getTrafficRecordsByVehicle(string memory _vehicleId) public view returns (string[] memory) {
-        return trafficByVehicle[_vehicleId];
+    function getTicketInfo(string memory _violationId) public view returns (Violation memory) {
+        require(bytes(violations[_violationId].violationId).length != 0, "Ticket not found");
+        return violations[_violationId];
     }
 }
